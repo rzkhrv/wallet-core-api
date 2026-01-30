@@ -36,6 +36,10 @@
 - Adapter errors should be wrapped in `AdapterError` and surfaced via `ApiExceptionFilter`.
 - Wallet-core WASM objects are manually released via `.delete()` in `finally` blocks.
 
+## Documentation lookup (required)
+- Use the `context7` MCP server as the primary source for library/framework documentation.
+- If Context7 does not cover what you need, consult other sources (prefer official docs and primary references).
+
 ## Where to look first (common tasks)
 - Add a new coin: `docs/COINS.md` and existing modules in `src/coins/` + `src/adapter/coins/`.
 - Add an endpoint: start at `src/coins/<coin>/*.controller.ts` and related services/DTOs.
