@@ -39,7 +39,7 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
             hash: hashBytes,
             index: utxo.vout,
           },
-          amount: new Long(Number(utxo.amount)),
+          amount: Long.fromString(utxo.amount),
           script: core.HexCoding.decode(utxo.scriptPubKey),
         });
       });
@@ -50,8 +50,8 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
 
       const signingInput = TW.Bitcoin.Proto.SigningInput.create({
         hashType: input.hashType ?? 1,
-        amount: new Long(Number(input.amount)),
-        byteFee: new Long(Number(input.byteFee)),
+        amount: Long.fromString(input.amount),
+        byteFee: Long.fromString(input.byteFee),
         toAddress: input.toAddress,
         changeAddress: input.changeAddress,
         privateKey: privateKeys,
