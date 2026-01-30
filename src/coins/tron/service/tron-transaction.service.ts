@@ -30,7 +30,7 @@ export class TronTransactionService implements CoinTransactionService<
     request: BuildTronTransactionRequestDto,
   ): BuildTronTransactionResponseDto {
     this.logger.log('Building TRON transfer from rawJson');
-    this.ensureNotSmartContract(request.rawJson);
+    this.ensureTransferContract(request.rawJson);
     return this.signRawTransaction(request);
   }
 
@@ -59,18 +59,18 @@ export class TronTransactionService implements CoinTransactionService<
 
   private ensureSmartContract(rawJson: string): void {
     const type = this.resolveContractType(rawJson);
-    if (!type || !type.includes('TriggerSmartContract')) {
+    if (!type || !this.isSmartContractType(type)) {
       throw new BadRequestException(
-        'TRON smart contract transaction expected',
+        `TRON smart contract transaction expected, got ${type ?? 'unknown'}`,
       );
     }
   }
 
-  private ensureNotSmartContract(rawJson: string): void {
+  private ensureTransferContract(rawJson: string): void {
     const type = this.resolveContractType(rawJson);
-    if (type && type.includes('TriggerSmartContract')) {
+    if (!type || !this.isTransferContractType(type)) {
       throw new BadRequestException(
-        'TRON transfer transaction expected',
+        `TRON transfer transaction expected, got ${type ?? 'unknown'}`,
       );
     }
   }
@@ -82,13 +82,33 @@ export class TronTransactionService implements CoinTransactionService<
       };
       const contract = parsed?.raw_data?.contract?.[0];
       if (!contract) return undefined;
-      if (typeof contract.type === 'string') return contract.type;
+      if (typeof contract.type === 'string') {
+        return this.normalizeContractType(contract.type);
+      }
       const parameter = contract.parameter;
-      if (typeof parameter?.type === 'string') return parameter.type;
-      if (typeof parameter?.type_url === 'string') return parameter.type_url;
+      if (typeof parameter?.type === 'string') {
+        return this.normalizeContractType(parameter.type);
+      }
+      if (typeof parameter?.type_url === 'string') {
+        return this.normalizeContractType(parameter.type_url);
+      }
       return undefined;
     } catch {
       return undefined;
     }
+  }
+
+  private normalizeContractType(value: string): string {
+    const bySlash = value.split('/').pop() ?? value;
+    const byDot = bySlash.split('.').pop() ?? bySlash;
+    return byDot;
+  }
+
+  private isTransferContractType(type: string): boolean {
+    return type === 'TransferContract' || type === 'TransferAssetContract';
+  }
+
+  private isSmartContractType(type: string): boolean {
+    return type === 'TriggerSmartContract' || type === 'TransferTRC20Contract';
   }
 }
