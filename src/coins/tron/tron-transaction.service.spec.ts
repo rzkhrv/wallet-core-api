@@ -80,6 +80,24 @@ describe('TRON transaction service', () => {
     expect(adapter.buildTransaction).toHaveBeenCalledTimes(1);
   });
 
+  it('signs raw transaction when rawJson is provided', () => {
+    const { adapter, service } = makeService();
+    const result = service.signRawTransaction({
+      rawJson: transferJson,
+      privateKey: '00'.repeat(32),
+      txId: 'txid',
+    });
+
+    expect(result).toBe(mockResponse);
+    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rawJson: transferJson,
+        privateKey: '00'.repeat(32),
+        txId: 'txid',
+      }),
+    );
+  });
+
   it('rejects raw transfer signing for smart contract rawJson', () => {
     const { service } = makeService();
     expect(() =>

@@ -34,7 +34,7 @@ export class TronTransactionController {
     return this.tronTransactionService.buildTransaction(body);
   }
 
-  @Post('sign-raw-transfer')
+  @Post('sign-transfer')
   @ApiOperation({ summary: 'Sign TRON transfer from rawJson' })
   @ApiBody({ type: SignTronRawTransactionRequestDto })
   @ApiResponse({ status: 200, type: BuildTronTransactionResponseDto })
@@ -45,7 +45,7 @@ export class TronTransactionController {
     return this.tronTransactionService.signRawTransfer(body);
   }
 
-  @Post('sign-raw-transaction')
+  @Post('sign-transaction')
   @ApiOperation({ summary: 'Sign TRON transaction from rawJson' })
   @ApiBody({ type: SignTronRawTransactionRequestDto })
   @ApiResponse({ status: 200, type: BuildTronTransactionResponseDto })

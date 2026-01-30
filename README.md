@@ -236,8 +236,12 @@ Response:
 }
 ```
 
-- `POST /api/v1/transaction/tron/sign-raw-transfer`
-- `POST /api/v1/transaction/tron/sign-raw-transaction`
+- `POST /api/v1/transaction/tron/sign-transfer`
+- `POST /api/v1/transaction/tron/sign-transaction`
+
+Naming convention for signing endpoints:
+- `/api/v1/transaction/<coin>/sign-transfer` (if the coin supports contract/token transfers)
+- `/api/v1/transa/ction/<coin>/sign-transaction`
 
 Request:
 ```json

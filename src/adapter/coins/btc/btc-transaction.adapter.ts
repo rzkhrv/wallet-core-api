@@ -9,7 +9,7 @@ import {
   BtcBuildTransactionAdapterRequest,
   BtcBuildTransactionAdapterResponse,
 } from './dto/btc-transaction-build.dto';
-import Long from "long";
+import Long from 'long';
 
 @Injectable()
 export class BtcTransactionAdapter implements CoinTransactionAdapter<

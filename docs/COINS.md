@@ -59,6 +59,12 @@ src/
         ltc-transaction.adapter.ts
 ```
 
+## Endpoint naming conventions (transactions)
+- Signing endpoints must follow this format:
+  - `/api/v1/transaction/<coin>/sign-transfer` (only if the coin supports contract/token transfers).
+  - `/api/v1/transaction/<coin>/sign-transaction` (for raw transaction signing).
+- Keep route names consistent with existing coins and document any deviations.
+
 ## Step-by-step: add a new coin
 1. Create BD tasks (see `docs/WORKFLOW.md`). Do not expand scope without new tasks.
 2. Add the coin identifier:
