@@ -2,6 +2,12 @@
 
 This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
 
+## Documentation entrypoint
+
+- `docs/PROJECT.md` - repo overview, architecture, conventions
+- `docs/COINS.md` - add/maintain coin support
+- `docs/WORKFLOW.md` - mandatory workflow and DoD
+
 ## Quick Reference
 
 ```bash
