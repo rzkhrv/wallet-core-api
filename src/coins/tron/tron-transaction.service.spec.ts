@@ -9,17 +9,6 @@ describe('TRON transaction service', () => {
   const smartContractJson = JSON.stringify({
     raw_data: { contract: [{ type: 'TriggerSmartContract' }] },
   });
-  const smartContractTypeUrlJson = JSON.stringify({
-    raw_data: {
-      contract: [
-        {
-          parameter: {
-            type_url: 'type.googleapis.com/protocol.TriggerSmartContract',
-          },
-        },
-      ],
-    },
-  });
   const unknownContractJson = JSON.stringify({
     raw_data: { contract: [{ type: 'VoteWitnessContract' }] },
   });
@@ -73,45 +62,4 @@ describe('TRON transaction service', () => {
     ).toThrow(BadRequestException);
   });
 
-  it('builds smart contract when rawJson is smart contract', () => {
-    const { adapter, service } = makeService();
-    const result = service.buildSmartContract({
-      rawJson: smartContractJson,
-      privateKey: '00'.repeat(32),
-    });
-
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledTimes(1);
-  });
-
-  it('builds smart contract when rawJson uses type_url', () => {
-    const { adapter, service } = makeService();
-    const result = service.buildSmartContract({
-      rawJson: smartContractTypeUrlJson,
-      privateKey: '00'.repeat(32),
-    });
-
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledTimes(1);
-  });
-
-  it('rejects smart contract endpoint for transfer rawJson', () => {
-    const { service } = makeService();
-    expect(() =>
-      service.buildSmartContract({
-        rawJson: transferJson,
-        privateKey: '00'.repeat(32),
-      }),
-    ).toThrow(BadRequestException);
-  });
-
-  it('rejects smart contract endpoint for unknown contract type', () => {
-    const { service } = makeService();
-    expect(() =>
-      service.buildSmartContract({
-        rawJson: unknownContractJson,
-        privateKey: '00'.repeat(32),
-      }),
-    ).toThrow(BadRequestException);
-  });
 });

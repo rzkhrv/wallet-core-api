@@ -34,14 +34,6 @@ export class TronTransactionService implements CoinTransactionService<
     return this.signRawTransaction(request);
   }
 
-  buildSmartContract(
-    request: BuildTronTransactionRequestDto,
-  ): BuildTronTransactionResponseDto {
-    this.logger.log('Building TRON smart contract from rawJson');
-    this.ensureSmartContract(request.rawJson);
-    return this.signRawTransaction(request);
-  }
-
   private signRawTransaction(
     request: BuildTronTransactionRequestDto,
   ): BuildTronTransactionResponseDto {
@@ -55,15 +47,6 @@ export class TronTransactionService implements CoinTransactionService<
       this.tronTransactionAdapter.buildTransaction(adapterRequest);
 
     return result;
-  }
-
-  private ensureSmartContract(rawJson: string): void {
-    const type = this.resolveContractType(rawJson);
-    if (!type || !this.isSmartContractType(type)) {
-      throw new BadRequestException(
-        `TRON smart contract transaction expected, got ${type ?? 'unknown'}`,
-      );
-    }
   }
 
   private ensureTransferContract(rawJson: string): void {
@@ -108,7 +91,4 @@ export class TronTransactionService implements CoinTransactionService<
     return type === 'TransferContract' || type === 'TransferAssetContract';
   }
 
-  private isSmartContractType(type: string): boolean {
-    return type === 'TriggerSmartContract' || type === 'TransferTRC20Contract';
-  }
 }

@@ -22,17 +22,6 @@ export class TronTransactionController {
     return this.tronTransactionService.buildTransfer(body);
   }
 
-  @Post('build-smart-contract')
-  @ApiOperation({ summary: 'Build and sign TRON smart contract from rawJson' })
-  @ApiBody({ type: BuildTronTransactionRequestDto })
-  @ApiResponse({ status: 200, type: BuildTronTransactionResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  buildSmartContract(
-    @Body() body: BuildTronTransactionRequestDto,
-  ): BuildTronTransactionResponseDto {
-    return this.tronTransactionService.buildSmartContract(body);
-  }
-
   @Post('build-transaction')
   @ApiOperation({ summary: 'Build and sign TRON transaction from rawJson' })
   @ApiBody({ type: BuildTronTransactionRequestDto })

@@ -231,18 +231,6 @@ describe('Wallet Core API (e2e)', () => {
       .expect(400);
   });
 
-  it('POST /api/v1/transaction/tron/build-smart-contract rejects transfer', async () => {
-    await request(app.getHttpServer())
-      .post('/api/v1/transaction/tron/build-smart-contract')
-      .send({
-        rawJson: JSON.stringify({
-          raw_data: { contract: [{ type: 'TransferContract' }] },
-        }),
-        privateKey: '00'.repeat(32),
-      })
-      .expect(400);
-  });
-
   it('POST /api/v1/transaction/tron/build-transaction rejects invalid json', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/build-transaction')
