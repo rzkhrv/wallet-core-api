@@ -3,10 +3,16 @@ import {
   BtcBuildTransactionAdapterRequest,
   BtcBuildTransactionAdapterResponse,
 } from '../../../adapter/coins/btc/dto/btc-transaction-build.dto';
+import {
+  BtcSignTransactionAdapterRequest,
+  BtcSignTransactionAdapterResponse,
+} from '../../../adapter/coins/btc/dto/btc-transaction-sign.dto';
 import { BtcTransactionAdapter } from '../../../adapter/coins/btc/btc-transaction.adapter';
 import { CoinTransactionService } from '../../contracts/coin-service.contracts';
 import { BuildBtcTransactionRequestDto } from '../dto/request/build-btc-transaction.request.dto';
+import { SignBtcTransactionRequestDto } from '../dto/request/sign-btc-transaction.request.dto';
 import { BuildBtcTransactionResponseDto } from '../dto/response/build-btc-transaction.response.dto';
+import { SignBtcTransactionResponseDto } from '../dto/response/sign-btc-transaction.response.dto';
 
 @Injectable()
 export class BtcTransactionService implements CoinTransactionService<
@@ -33,13 +39,27 @@ export class BtcTransactionService implements CoinTransactionService<
         scriptPubKey: utxo.scriptPubKey,
         reverseTxId: utxo.reverseTxId,
       })),
-      privateKeys: request.privateKeys,
       hashType: request.hashType,
       useMaxAmount: request.useMaxAmount,
     };
 
     const result: BtcBuildTransactionAdapterResponse =
       this.btcTransactionAdapter.buildTransaction(adapterRequest);
+
+    return result;
+  }
+
+  signTransaction(
+    request: SignBtcTransactionRequestDto,
+  ): SignBtcTransactionResponseDto {
+    this.logger.log('Signing BTC transaction');
+    const adapterRequest: BtcSignTransactionAdapterRequest = {
+      payload: request.payload,
+      privateKeys: request.privateKeys,
+    };
+
+    const result: BtcSignTransactionAdapterResponse =
+      this.btcTransactionAdapter.signTransaction(adapterRequest);
 
     return result;
   }

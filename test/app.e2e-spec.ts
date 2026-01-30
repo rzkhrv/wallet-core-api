@@ -227,7 +227,7 @@ describe('Wallet Core API (e2e)', () => {
       : encodedScript;
     script.delete();
 
-    const response = await request(app.getHttpServer())
+    const buildResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/btc/build-transaction')
       .send({
         toAddress: btcAddress,
@@ -243,17 +243,27 @@ describe('Wallet Core API (e2e)', () => {
             reverseTxId: false,
           },
         ],
+      })
+      .expect(201);
+
+    expect(buildResponse.body.payload).toBeDefined();
+    expect(buildResponse.body.plan?.amount).toBe('1000');
+
+    const signResponse = await request(app.getHttpServer())
+      .post('/api/v1/transaction/btc/sign-transaction')
+      .send({
+        payload: buildResponse.body.payload,
         privateKeys: [btcPrivateKey],
       })
       .expect(201);
 
-    expect(response.body.rawTx).toBeDefined();
-    expect(response.body.txId).toBeDefined();
-    expect(response.body.plan?.amount).toBe('1000');
+    expect(signResponse.body.rawTx).toBeDefined();
+    expect(signResponse.body.txId).toBeDefined();
+    expect(signResponse.body.plan?.amount).toBe('1000');
   });
 
   it('POST /api/v1/transaction/eth/build-transaction', async () => {
-    const response = await request(app.getHttpServer())
+    const buildResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/eth/build-transaction')
       .send({
         chainId: '1',
@@ -262,16 +272,25 @@ describe('Wallet Core API (e2e)', () => {
         gasLimit: '21000',
         toAddress: ethAddress,
         amount: '1000000000000000',
+      })
+      .expect(201);
+
+    expect(buildResponse.body.payload).toBeDefined();
+
+    const signResponse = await request(app.getHttpServer())
+      .post('/api/v1/transaction/eth/sign-transaction')
+      .send({
+        payload: buildResponse.body.payload,
         privateKey: ethPrivateKey,
       })
       .expect(201);
 
-    expect(response.body.rawTx).toBeDefined();
-    expect(response.body.signature?.v).toBeDefined();
+    expect(signResponse.body.rawTx).toBeDefined();
+    expect(signResponse.body.signature?.v).toBeDefined();
   });
 
   it('POST /api/v1/transaction/eth/build-transfer', async () => {
-    const response = await request(app.getHttpServer())
+    const buildResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/eth/build-transfer')
       .send({
         chainId: '1',
@@ -281,12 +300,21 @@ describe('Wallet Core API (e2e)', () => {
         toAddress: ethAddress,
         tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         amount: '1000000',
+      })
+      .expect(201);
+
+    expect(buildResponse.body.payload).toBeDefined();
+
+    const signResponse = await request(app.getHttpServer())
+      .post('/api/v1/transaction/eth/sign-transfer')
+      .send({
+        payload: buildResponse.body.payload,
         privateKey: ethPrivateKey,
       })
       .expect(201);
 
-    expect(response.body.rawTx).toBeDefined();
-    expect(response.body.signature?.v).toBeDefined();
+    expect(signResponse.body.rawTx).toBeDefined();
+    expect(signResponse.body.signature?.v).toBeDefined();
   });
 
   it('POST /api/v1/transaction/tron/build-transfer rejects smart contract', async () => {

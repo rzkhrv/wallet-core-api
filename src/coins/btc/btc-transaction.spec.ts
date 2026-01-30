@@ -42,7 +42,7 @@ describe('BTC transaction signing', () => {
     const scriptPubKey = core.HexCoding.encode(script.data());
     script.delete();
 
-    const result = transactionAdapter.buildTransaction({
+    const buildResult = transactionAdapter.buildTransaction({
       toAddress: recipientAddress.address,
       changeAddress: utxoAddress.address,
       amount: '1000',
@@ -56,11 +56,18 @@ describe('BTC transaction signing', () => {
           reverseTxId: false,
         },
       ],
+    });
+
+    expect(buildResult.payload).toBeDefined();
+    expect(buildResult.plan.amount).toBe('1000');
+
+    const signResult = transactionAdapter.signTransaction({
+      payload: buildResult.payload,
       privateKeys: [utxoAddress.keys.private],
     });
 
-    expect(result.rawTx).toBeDefined();
-    expect(result.txId).toBeDefined();
-    expect(result.plan.amount).toBe('1000');
+    expect(signResult.rawTx).toBeDefined();
+    expect(signResult.txId).toBeDefined();
+    expect(signResult.plan.amount).toBe('1000');
   });
 });

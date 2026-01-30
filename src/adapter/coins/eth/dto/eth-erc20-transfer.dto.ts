@@ -1,4 +1,4 @@
-export interface EthErc20TransferAdapterRequest {
+export interface EthErc20TransferBuildAdapterRequest {
   chainId: string;
   nonce: string;
   gasPrice: string;
@@ -6,16 +6,8 @@ export interface EthErc20TransferAdapterRequest {
   toAddress: string;
   tokenContract: string;
   amount: string;
-  privateKey: string;
 }
 
-export interface EthErc20TransferAdapterResponse {
-  rawTx: string;
-  preHash: string;
-  data: string;
-  signature: {
-    v: string;
-    r: string;
-    s: string;
-  };
+export interface EthErc20TransferBuildAdapterResponse {
+  payload: string;
 }

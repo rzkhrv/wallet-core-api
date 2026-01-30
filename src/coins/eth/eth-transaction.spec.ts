@@ -24,6 +24,24 @@ describe('ETH transaction signing', () => {
       toAddress: '0x1111111111111111111111111111111111111111',
       tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       amount: '1000000',
+    });
+
+    expect(result.payload).toBeDefined();
+  });
+
+  it('signs ERC20 transfer (adapter)', () => {
+    const buildResult = transactionAdapter.buildTransfer({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '60000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amount: '1000000',
+    });
+
+    const result = transactionAdapter.signTransfer({
+      payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
     });
@@ -42,6 +60,23 @@ describe('ETH transaction signing', () => {
       gasLimit: '21000',
       toAddress: '0x1111111111111111111111111111111111111111',
       amount: '1000000000000000',
+    });
+
+    expect(result.payload).toBeDefined();
+  });
+
+  it('signs ETH transaction (adapter)', () => {
+    const buildResult = transactionAdapter.buildTransaction({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '1000000000000000',
+    });
+
+    const result = transactionAdapter.signTransaction({
+      payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
     });
@@ -61,11 +96,9 @@ describe('ETH transaction signing', () => {
       toAddress: '0x1111111111111111111111111111111111111111',
       tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       amount: '1000000',
-      privateKey:
-        '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
     });
 
-    expect(result.rawTx).toBeDefined();
+    expect(result.payload).toBeDefined();
   });
 
   it('builds ETH transaction (service)', () => {
@@ -76,6 +109,43 @@ describe('ETH transaction signing', () => {
       gasLimit: '21000',
       toAddress: '0x1111111111111111111111111111111111111111',
       amount: '1000000000000000',
+    });
+
+    expect(result.payload).toBeDefined();
+  });
+
+  it('signs ERC20 transfer (service)', () => {
+    const buildResult = transactionService.buildTransfer({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '60000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amount: '1000000',
+    });
+
+    const result = transactionService.signTransfer({
+      payload: buildResult.payload,
+      privateKey:
+        '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
+    });
+
+    expect(result.rawTx).toBeDefined();
+  });
+
+  it('signs ETH transaction (service)', () => {
+    const buildResult = transactionService.buildTransaction({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '1000000000000000',
+    });
+
+    const result = transactionService.signTransaction({
+      payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
     });
@@ -84,30 +154,48 @@ describe('ETH transaction signing', () => {
   });
 
   it('throws on invalid private key', () => {
+    const buildResult = transactionAdapter.buildTransfer({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '60000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amount: '1000000',
+    });
+
     expect(() =>
-      transactionAdapter.buildTransfer({
-        chainId: '1',
-        nonce: '0',
-        gasPrice: '20000000000',
-        gasLimit: '60000',
-        toAddress: '0x1111111111111111111111111111111111111111',
-        tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        amount: '1000000',
+      transactionAdapter.signTransfer({
+        payload: buildResult.payload,
         privateKey: 'invalid',
       }),
     ).toThrow(AdapterError);
   });
 
   it('throws on invalid private key for ETH transaction', () => {
+    const buildResult = transactionAdapter.buildTransaction({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '1000000000000000',
+    });
+
     expect(() =>
-      transactionAdapter.buildTransaction({
-        chainId: '1',
-        nonce: '0',
-        gasPrice: '20000000000',
-        gasLimit: '21000',
-        toAddress: '0x1111111111111111111111111111111111111111',
-        amount: '1000000000000000',
+      transactionAdapter.signTransaction({
+        payload: buildResult.payload,
         privateKey: 'invalid',
+      }),
+    ).toThrow(AdapterError);
+  });
+
+  it('throws on invalid payload', () => {
+    expect(() =>
+      transactionAdapter.signTransaction({
+        payload: 'invalid',
+        privateKey:
+          '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
       }),
     ).toThrow(AdapterError);
   });

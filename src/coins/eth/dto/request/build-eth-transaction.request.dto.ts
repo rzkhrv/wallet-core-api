@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsNumberString,
   IsString,
-  Matches,
 } from 'class-validator';
 
 export class BuildEthTransactionRequestDto {
@@ -52,13 +51,4 @@ export class BuildEthTransactionRequestDto {
   @IsString()
   @IsNotEmpty()
   amount: string;
-
-  @ApiProperty({
-    example: '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
-    description: 'Sender private key (hex)',
-  })
-  @Matches(/^(0x)?[0-9a-fA-F]{64}$/)
-  @IsString()
-  @IsNotEmpty()
-  privateKey: string;
 }

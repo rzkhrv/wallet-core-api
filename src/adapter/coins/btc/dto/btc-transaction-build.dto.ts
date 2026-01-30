@@ -12,14 +12,12 @@ export interface BtcBuildTransactionAdapterRequest {
   amount: string;
   byteFee: string;
   utxos: BtcUtxoInput[];
-  privateKeys: string[];
   hashType?: number;
   useMaxAmount?: boolean;
 }
 
 export interface BtcBuildTransactionAdapterResponse {
-  rawTx: string;
-  txId: string;
+  payload: string;
   plan: {
     amount: string;
     availableAmount: string;

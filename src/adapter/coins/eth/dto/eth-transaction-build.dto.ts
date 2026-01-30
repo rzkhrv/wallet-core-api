@@ -5,16 +5,8 @@ export interface EthTransactionBuildAdapterRequest {
   gasLimit: string;
   toAddress: string;
   amount: string;
-  privateKey: string;
 }
 
 export interface EthTransactionBuildAdapterResponse {
-  rawTx: string;
-  preHash: string;
-  data: string;
-  signature: {
-    v: string;
-    r: string;
-    s: string;
-  };
+  payload: string;
 }
