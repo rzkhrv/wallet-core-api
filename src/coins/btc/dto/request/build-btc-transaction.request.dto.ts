@@ -16,31 +16,43 @@ import {
 import { BtcUtxoRequestDto } from './btc-utxo.request.dto';
 
 export class BuildBtcTransactionRequestDto {
-  @ApiProperty({ example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h' })
+  @ApiProperty({
+    example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h',
+    description: 'Recipient BTC address',
+  })
   @IsBtcAddress()
   @IsString()
   @IsNotEmpty()
   toAddress: string;
 
-  @ApiProperty({ example: 'bc1q2l3m4n5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e' })
+  @ApiProperty({
+    example: 'bc1q2l3m4n5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e',
+    description: 'Change BTC address',
+  })
   @IsBtcAddress()
   @IsString()
   @IsNotEmpty()
   changeAddress: string;
 
-  @ApiProperty({ example: '10000' })
+  @ApiProperty({
+    example: '10000',
+    description: 'Amount to send in satoshis',
+  })
   @IsNumberString({ no_symbols: true })
   @IsString()
   @IsNotEmpty()
   amount: string;
 
-  @ApiProperty({ example: '10' })
+  @ApiProperty({ example: '10', description: 'Fee per byte in satoshis' })
   @IsNumberString({ no_symbols: true })
   @IsString()
   @IsNotEmpty()
   byteFee: string;
 
-  @ApiProperty({ type: [BtcUtxoRequestDto] })
+  @ApiProperty({
+    type: [BtcUtxoRequestDto],
+    description: 'List of UTXOs to spend',
+  })
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
@@ -51,6 +63,7 @@ export class BuildBtcTransactionRequestDto {
     example: [
       'e8f32e723decf4051aefac8e2c3b1f9d9ad7a2b9f19e0f8f6a2b3c4d5e6f7081',
     ],
+    description: 'Private keys for the provided UTXOs',
   })
   @IsArray()
   @ArrayNotEmpty()
@@ -58,12 +71,18 @@ export class BuildBtcTransactionRequestDto {
   @IsString({ each: true })
   privateKeys: string[];
 
-  @ApiPropertyOptional({ example: 1 })
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Optional SIGHASH type',
+  })
   @IsOptional()
   @IsInt()
   hashType?: number;
 
-  @ApiPropertyOptional({ example: false })
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Spend maximum available amount',
+  })
   @IsOptional()
   @IsBoolean()
   useMaxAmount?: boolean;

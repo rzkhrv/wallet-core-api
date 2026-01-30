@@ -7,7 +7,7 @@ import {
   Matches,
 } from 'class-validator';
 
-export class BuildEthErc20TransferRequestDto {
+export class BuildEthTransactionRequestDto {
   @ApiProperty({ example: '1', description: 'Ethereum chain id' })
   @IsNumberString({ no_symbols: true })
   @IsString()
@@ -29,7 +29,7 @@ export class BuildEthErc20TransferRequestDto {
   @IsNotEmpty()
   gasPrice: string;
 
-  @ApiProperty({ example: '60000', description: 'Gas limit' })
+  @ApiProperty({ example: '21000', description: 'Gas limit' })
   @IsNumberString({ no_symbols: true })
   @IsString()
   @IsNotEmpty()
@@ -37,7 +37,7 @@ export class BuildEthErc20TransferRequestDto {
 
   @ApiProperty({
     example: '0x1111111111111111111111111111111111111111',
-    description: 'ERC20 recipient address',
+    description: 'Recipient ETH address',
   })
   @IsEthereumAddress()
   @IsString()
@@ -45,17 +45,8 @@ export class BuildEthErc20TransferRequestDto {
   toAddress: string;
 
   @ApiProperty({
-    example: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    description: 'ERC20 token contract address',
-  })
-  @IsEthereumAddress()
-  @IsString()
-  @IsNotEmpty()
-  tokenContract: string;
-
-  @ApiProperty({
-    example: '1000000',
-    description: 'Token amount in smallest units',
+    example: '1000000000000000',
+    description: 'Amount in wei',
   })
   @IsNumberString({ no_symbols: true })
   @IsString()

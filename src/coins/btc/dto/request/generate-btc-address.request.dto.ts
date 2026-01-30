@@ -5,12 +5,18 @@ import { BtcDerivationRequestDto } from './btc-derivation.request.dto';
 import { BtcMnemonicRequestDto } from './btc-mnemonic.request.dto';
 
 export class GenerateBtcAddressRequestDto {
-  @ApiProperty({ type: BtcMnemonicRequestDto })
+  @ApiProperty({
+    type: BtcMnemonicRequestDto,
+    description: 'Mnemonic input for key derivation',
+  })
   @ValidateNested()
   @Type(() => BtcMnemonicRequestDto)
   mnemonic: BtcMnemonicRequestDto;
 
-  @ApiProperty({ type: BtcDerivationRequestDto })
+  @ApiProperty({
+    type: BtcDerivationRequestDto,
+    description: 'Derivation path parameters',
+  })
   @ValidateNested()
   @Type(() => BtcDerivationRequestDto)
   derivation: BtcDerivationRequestDto;

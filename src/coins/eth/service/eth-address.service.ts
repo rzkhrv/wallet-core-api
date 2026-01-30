@@ -38,7 +38,7 @@ export class EthAddressService implements CoinAddressService<
       },
       derivation: {
         account: request.derivation.account,
-        change: request.derivation.change,
+        change: Number(request.derivation.change),
         index: request.derivation.index,
       },
     };

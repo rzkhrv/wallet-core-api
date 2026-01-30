@@ -43,7 +43,7 @@ describe('BTC address flows', () => {
     });
     const result = addressService.generate({
       mnemonic: { value: mnemonic.mnemonic, passphrase: '' },
-      derivation: { account: 0, change: 0, index: 1 },
+      derivation: { account: 0, change: false, index: 1 },
     });
 
     expect(result.address).toBeDefined();

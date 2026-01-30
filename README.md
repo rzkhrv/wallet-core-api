@@ -206,7 +206,51 @@ Response:
 }
 ```
 
-- `POST /api/v1/transaction/tron/build-transaction`
+- `POST /api/v1/transaction/tron/build-transfer`
+
+Request:
+```json
+{
+  "rawJson": "{\"visible\":true,...}",
+  "privateKey": "...",
+  "txId": "optional"
+}
+```
+
+Response:
+```json
+{
+  "txId": "...",
+  "signature": "...",
+  "refBlockBytes": "...",
+  "refBlockHash": "...",
+  "signedJson": "..."
+}
+```
+
+- `POST /api/v1/transaction/tron/build-smart-contract`
+
+Request:
+```json
+{
+  "rawJson": "{\"visible\":true,...}",
+  "privateKey": "...",
+  "txId": "optional"
+}
+```
+
+Response:
+```json
+{
+  "txId": "...",
+  "signature": "...",
+  "refBlockBytes": "...",
+  "refBlockHash": "...",
+  "signedJson": "..."
+}
+```
+
+- `POST /api/v1/transaction/tron/build-transaction` (legacy)
 
 Request:
 ```json

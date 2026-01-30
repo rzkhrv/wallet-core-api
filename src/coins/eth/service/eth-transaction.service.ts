@@ -4,14 +4,20 @@ import {
   EthErc20TransferAdapterRequest,
   EthErc20TransferAdapterResponse,
 } from '../../../adapter/coins/eth/dto/eth-erc20-transfer.dto';
+import {
+  EthTransactionBuildAdapterRequest,
+  EthTransactionBuildAdapterResponse,
+} from '../../../adapter/coins/eth/dto/eth-transaction-build.dto';
 import { CoinTransactionService } from '../../contracts/coin-service.contracts';
 import { BuildEthErc20TransferRequestDto } from '../dto/request/build-eth-erc20-transfer.request.dto';
+import { BuildEthTransactionRequestDto } from '../dto/request/build-eth-transaction.request.dto';
 import { BuildEthErc20TransferResponseDto } from '../dto/response/build-eth-erc20-transfer.response.dto';
+import { BuildEthTransactionResponseDto } from '../dto/response/build-eth-transaction.response.dto';
 
 @Injectable()
 export class EthTransactionService implements CoinTransactionService<
-  never,
-  never,
+  BuildEthTransactionRequestDto,
+  BuildEthTransactionResponseDto,
   BuildEthErc20TransferRequestDto,
   BuildEthErc20TransferResponseDto
 > {
@@ -19,8 +25,24 @@ export class EthTransactionService implements CoinTransactionService<
 
   constructor(private readonly ethTransactionAdapter: EthTransactionAdapter) {}
 
-  buildTransaction(_request: never): never {
-    throw new Error('ETH build-transaction is not implemented');
+  buildTransaction(
+    request: BuildEthTransactionRequestDto,
+  ): BuildEthTransactionResponseDto {
+    this.logger.log('Building ETH transaction');
+    const adapterRequest: EthTransactionBuildAdapterRequest = {
+      chainId: request.chainId,
+      nonce: request.nonce,
+      gasPrice: request.gasPrice,
+      gasLimit: request.gasLimit,
+      toAddress: request.toAddress,
+      amount: request.amount,
+      privateKey: request.privateKey,
+    };
+
+    const result: EthTransactionBuildAdapterResponse =
+      this.ethTransactionAdapter.buildTransaction(adapterRequest);
+
+    return result;
   }
 
   buildTransfer(

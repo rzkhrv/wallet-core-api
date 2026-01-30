@@ -5,12 +5,16 @@ export class EthMnemonicRequestDto {
   @ApiProperty({
     example:
       'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+    description: 'BIP39 mnemonic phrase',
   })
   @IsString()
   @IsNotEmpty()
   value: string;
 
-  @ApiPropertyOptional({ example: 'my-passphrase' })
+  @ApiPropertyOptional({
+    example: 'my-passphrase',
+    description: 'Optional BIP39 passphrase',
+  })
   @IsOptional()
   @IsString()
   passphrase?: string;

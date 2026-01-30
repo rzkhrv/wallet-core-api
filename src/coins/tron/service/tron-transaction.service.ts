@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   TronBuildTransactionAdapterRequest,
   TronBuildTransactionAdapterResponse,
@@ -23,6 +23,28 @@ export class TronTransactionService implements CoinTransactionService<
     request: BuildTronTransactionRequestDto,
   ): BuildTronTransactionResponseDto {
     this.logger.log('Building TRON transaction from rawJson');
+    return this.signRawTransaction(request);
+  }
+
+  buildTransfer(
+    request: BuildTronTransactionRequestDto,
+  ): BuildTronTransactionResponseDto {
+    this.logger.log('Building TRON transfer from rawJson');
+    this.ensureNotSmartContract(request.rawJson);
+    return this.signRawTransaction(request);
+  }
+
+  buildSmartContract(
+    request: BuildTronTransactionRequestDto,
+  ): BuildTronTransactionResponseDto {
+    this.logger.log('Building TRON smart contract from rawJson');
+    this.ensureSmartContract(request.rawJson);
+    return this.signRawTransaction(request);
+  }
+
+  private signRawTransaction(
+    request: BuildTronTransactionRequestDto,
+  ): BuildTronTransactionResponseDto {
     const adapterRequest: TronBuildTransactionAdapterRequest = {
       rawJson: request.rawJson,
       privateKey: request.privateKey,
@@ -33,5 +55,40 @@ export class TronTransactionService implements CoinTransactionService<
       this.tronTransactionAdapter.buildTransaction(adapterRequest);
 
     return result;
+  }
+
+  private ensureSmartContract(rawJson: string): void {
+    const type = this.resolveContractType(rawJson);
+    if (!type || !type.includes('TriggerSmartContract')) {
+      throw new BadRequestException(
+        'TRON smart contract transaction expected',
+      );
+    }
+  }
+
+  private ensureNotSmartContract(rawJson: string): void {
+    const type = this.resolveContractType(rawJson);
+    if (type && type.includes('TriggerSmartContract')) {
+      throw new BadRequestException(
+        'TRON transfer transaction expected',
+      );
+    }
+  }
+
+  private resolveContractType(rawJson: string): string | undefined {
+    try {
+      const parsed = JSON.parse(rawJson) as {
+        raw_data?: { contract?: Array<{ type?: string; parameter?: any }> };
+      };
+      const contract = parsed?.raw_data?.contract?.[0];
+      if (!contract) return undefined;
+      if (typeof contract.type === 'string') return contract.type;
+      const parameter = contract.parameter;
+      if (typeof parameter?.type === 'string') return parameter.type;
+      if (typeof parameter?.type_url === 'string') return parameter.type_url;
+      return undefined;
+    } catch {
+      return undefined;
+    }
   }
 }
