@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TW } from '@trustwallet/wallet-core';
+import Long from 'long';
 import { resolveCoinConfig } from '../../../coins/coin.config';
 import { Coin } from '../../../coins/enum/coin.enum';
 import { AdapterError } from '../../common/adapter-error';
@@ -9,10 +10,14 @@ import {
   TronBuildTransactionAdapterRequest,
   TronBuildTransactionAdapterResponse,
 } from './dto/tron-transaction-build.dto';
+import { TronBuildTransferAdapterRequest } from './dto/tron-transaction-build-transfer.dto';
+import { TronSignRawTransactionAdapterRequest } from './dto/tron-transaction-sign-raw.dto';
 
 @Injectable()
 export class TronTransactionAdapter implements CoinTransactionAdapter<
-  TronBuildTransactionAdapterRequest,
+  TronSignRawTransactionAdapterRequest,
+  TronBuildTransactionAdapterResponse,
+  TronBuildTransferAdapterRequest,
   TronBuildTransactionAdapterResponse
 > {
   private readonly logger = new Logger(TronTransactionAdapter.name);
@@ -20,9 +25,76 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
   buildTransaction(
-    input: TronBuildTransactionAdapterRequest,
+    input: TronSignRawTransactionAdapterRequest,
   ): TronBuildTransactionAdapterResponse {
     this.logger.log('Signing TRON raw transaction');
+    return this.signTransaction({
+      rawJson: input.rawJson,
+      txId: input.txId,
+      privateKey: input.privateKey,
+    });
+  }
+
+  buildTransfer(
+    input: TronBuildTransferAdapterRequest,
+  ): TronBuildTransactionAdapterResponse {
+    this.logger.log('Building and signing TRON transfer');
+    const transferType = input.transferType;
+    const now = Date.now();
+    const timestamp = input.timestamp
+      ? Long.fromString(input.timestamp)
+      : Long.fromNumber(now);
+    const expiration = input.expiration
+      ? Long.fromString(input.expiration)
+      : Long.fromNumber(now + 60_000);
+
+    const baseTransaction: Partial<TW.Tron.Proto.ITransaction> = {
+      timestamp,
+      expiration,
+    };
+
+    if (input.feeLimit) {
+      baseTransaction.feeLimit = Long.fromString(input.feeLimit);
+    }
+
+    if (input.memo) {
+      baseTransaction.memo = input.memo;
+    }
+
+    let transaction: TW.Tron.Proto.Transaction;
+
+    if (transferType === 'trc10') {
+      const transferAsset = TW.Tron.Proto.TransferAssetContract.create({
+        ownerAddress: input.ownerAddress,
+        toAddress: input.toAddress,
+        assetName: input.assetName ?? '',
+        amount: Long.fromString(input.amount),
+      });
+      transaction = TW.Tron.Proto.Transaction.create({
+        ...baseTransaction,
+        transferAsset,
+      });
+    } else {
+      const transfer = TW.Tron.Proto.TransferContract.create({
+        ownerAddress: input.ownerAddress,
+        toAddress: input.toAddress,
+        amount: Long.fromString(input.amount),
+      });
+      transaction = TW.Tron.Proto.Transaction.create({
+        ...baseTransaction,
+        transfer,
+      });
+    }
+
+    return this.signTransaction({
+      transaction,
+      privateKey: input.privateKey,
+    });
+  }
+
+  private signTransaction(
+    input: TronBuildTransactionAdapterRequest,
+  ): TronBuildTransactionAdapterResponse {
     const core = this.walletCore.getCore();
     const { coinType } = resolveCoinConfig(core, Coin.TRON);
 

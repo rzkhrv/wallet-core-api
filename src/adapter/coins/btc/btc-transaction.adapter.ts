@@ -9,6 +9,7 @@ import {
   BtcBuildTransactionAdapterRequest,
   BtcBuildTransactionAdapterResponse,
 } from './dto/btc-transaction-build.dto';
+import Long from "long";
 
 @Injectable()
 export class BtcTransactionAdapter implements CoinTransactionAdapter<
@@ -38,7 +39,7 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
             hash: hashBytes,
             index: utxo.vout,
           },
-          amount: utxo.amount,
+          amount: new Long(Number(utxo.amount)),
           script: core.HexCoding.decode(utxo.scriptPubKey),
         });
       });
@@ -49,8 +50,8 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
 
       const signingInput = TW.Bitcoin.Proto.SigningInput.create({
         hashType: input.hashType ?? 1,
-        amount: input.amount,
-        byteFee: input.byteFee,
+        amount: new Long(Number(input.amount)),
+        byteFee: new Long(Number(input.byteFee)),
         toAddress: input.toAddress,
         changeAddress: input.changeAddress,
         privateKey: privateKeys,

@@ -1,7 +1,6 @@
 import { TronTransactionAdapter } from '../../adapter/coins/tron/tron-transaction.adapter';
 import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
 import { AdapterError } from '../../adapter/common/adapter-error';
-import { TW } from '@trustwallet/wallet-core';
 
 describe('TRON transaction signing', () => {
   let walletCore: WalletCoreAdapter;
@@ -22,19 +21,14 @@ describe('TRON transaction signing', () => {
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
 
-    const transfer = TW.Tron.Proto.TransferContract.create({
+    const now = Date.now();
+    const result = transactionAdapter.buildTransfer({
+      transferType: 'trx',
       ownerAddress,
       toAddress: recipientAddress,
-      amount: 1,
-    });
-    const transaction = TW.Tron.Proto.Transaction.create({
-      transfer,
-      timestamp: Date.now(),
-      expiration: Date.now() + 60_000,
-    });
-
-    const result = transactionAdapter.buildTransaction({
-      transaction,
+      amount: '1',
+      timestamp: `${now}`,
+      expiration: `${now + 60_000}`,
       privateKey,
     });
 
@@ -48,6 +42,7 @@ describe('TRON transaction signing', () => {
   it('throws when transaction input is missing', () => {
     expect(() =>
       transactionAdapter.buildTransaction({
+        rawJson: '',
         privateKey: '00'.repeat(32),
       }),
     ).toThrow(AdapterError);

@@ -8,7 +8,7 @@ REST API for wallet-core operations built with NestJS and `@trustwallet/wallet-c
 - BTC and TRON address generation/validation
 - BTC transaction building/signing
 - ETH ERC20 transfer signing
-- TRON raw transaction signing
+- TRON transaction building/signing (params or raw JSON)
 
 ## Requirements
 
@@ -207,15 +207,23 @@ Response:
 ```
 
 - `POST /api/v1/transaction/tron/build-transfer`
+- `POST /api/v1/transaction/tron/build-transaction`
 
 Request:
 ```json
 {
-  "rawJson": "{\"visible\":true,...}",
-  "privateKey": "...",
-  "txId": "optional"
+  "transferType": "trx",
+  "ownerAddress": "T...",
+  "toAddress": "T...",
+  "amount": "1000000",
+  "timestamp": "1738253400000",
+  "expiration": "1738253460000",
+  "privateKey": "..."
 }
 ```
+Notes:
+- `transferType` can be `trx` or `trc10` (TRC10 requires `assetName`).
+- `build-transfer` always uses `trx`.
 
 Response:
 ```json
@@ -228,7 +236,8 @@ Response:
 }
 ```
 
-- `POST /api/v1/transaction/tron/build-transaction` (legacy)
+- `POST /api/v1/transaction/tron/sign-raw-transfer`
+- `POST /api/v1/transaction/tron/sign-raw-transaction`
 
 Request:
 ```json
