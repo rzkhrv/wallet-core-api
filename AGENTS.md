@@ -1,198 +1,96 @@
-# Agent Instructions
+# Agent Guide
 
-This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
+Wallet Core API is a NestJS (TypeScript) REST service that wraps `@trustwallet/wallet-core` WASM for mnemonic, address, and transaction operations. Runtime is Node.js (18+ recommended) with Swagger at `/api` and a default HTTP port of `3001` unless `PORT` is set.
 
-## Documentation entrypoint
-
-- `docs/PROJECT.md` - repo overview, architecture, conventions
-- `docs/COINS.md` - add/maintain coin support
-- `docs/WORKFLOW.md` - mandatory workflow and DoD
-
-## Quick Reference
+## Quick commands (verified)
 
 ```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id>         # Complete work
-bd sync               # Sync with git
+# install / bootstrap
+npm install
+
+# dev / run
+npm run start:dev
+npm run start
+
+# tests
+npm run test
+npm run test:e2e
+
+# lint / format / typecheck
+npm run lint
+npm run format
+npm run build
+
+# build
+npm run build
+
+# migrations / seed
+# n/a (no database layer)
 ```
 
-## Landing the Plane (Session Completion)
+## Repo map
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+- `src/main.ts` - Nest bootstrap, global validation, Swagger setup, default port.
+- `src/app.module.ts` - root module wiring.
+- `src/coins/` - API layer per coin (controllers/services/DTOs).
+- `src/adapter/` - wallet-core WASM adapters.
+- `src/common/` - shared errors/filters and common modules.
+- `test/` - e2e tests.
+- `docs/` - project docs (`PROJECT.md`, `COINS.md`, `WORKFLOW.md`).
+- `dist/` - build output (generated, do not edit).
+- `node_modules/` - dependencies (generated, do not edit).
+- `.beads/` - issue tracking data (tracked in git).
 
-**MANDATORY WORKFLOW:**
+## Workflows
 
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
+- How to use bd (required): `docs/agents/workflows/how-to-use-bd.md`.
+- How to extend the project (new coins/features): `docs/agents/workflows/how-to-extend-the-project.md`.
+- Add a new coin: `docs/COINS.md` (also linked from workflows).
+- Add a new endpoint: see `docs/agents/patterns/` for controller/service/adapter examples.
 
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
+## Documentation memory rule (mandatory)
 
+Any new non-obvious repo knowledge, failure mode, or workflow discovered during work MUST be written into `docs/agents/` in the same change set.
 
+## Task management rule (mandatory)
 
-<!-- BEGIN BEADS INTEGRATION -->
-## Issue Tracking with bd (beads)
+- All work must be tracked in Beads.
+- Start with `bd ready --json`, then `bd show <id>`.
+- Mark in progress via `bd update <id> --status in_progress --json`.
+- Create new beads for newly discovered work (`--deps discovered-from:<id>`).
+- Every epic must include a “Docs/Knowledge capture” task.
 
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+## Boundaries
 
-### Why bd?
+✅ Always do
+- Use bd for task tracking and keep .beads in sync.
+- Follow `docs/WORKFLOW.md` and `docs/coding-rules.md` for conventions.
+- Add tests for new endpoints (unit/integration + e2e).
 
-- Dependency-aware: Track blockers and relationships between issues
-- Git-friendly: Auto-syncs to JSONL for version control
-- Agent-optimized: JSON output, ready work detection, discovered-from links
-- Prevents duplicate tracking systems and confusion
+⚠️ Ask first
+- Changing coin derivation rules or wallet-core config (`src/coins/coin.config.ts`).
+- Modifying error shape or global filters (`src/common/errors/*`).
+- Adding dependencies or altering build/test pipelines.
 
-### Quick Start
+🚫 Never do
+- Log or persist secrets (mnemonics, private keys, raw signatures).
+- Edit generated files (`dist/`, `node_modules/`).
+- Bypass bd for task tracking or use markdown TODO lists.
 
-**Check for ready work:**
+## Troubleshooting (top issues)
 
-```bash
-bd ready --json
-```
+- bd daemon slow start or auto-flush permission errors: see `docs/agents/runbooks/bd-daemon-issues.md`.
+- Port mismatch (README says 3000, app defaults to 3001): see `docs/agents/troubleshooting.md`.
+- wallet-core WASM init errors: see `docs/agents/runbooks/wallet-core-init.md`.
+- Failing e2e tests on first run: see `docs/agents/runbooks/e2e-test-setup.md`.
 
-**Create new issues:**
+## docs/agents index
 
-```bash
-bd create "Issue title" --description="Detailed context" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" --description="What this issue is about" -p 1 --deps discovered-from:bd-123 --json
-```
-
-**Claim and update:**
-
-```bash
-bd update bd-42 --status in_progress --json
-bd update bd-42 --priority 1 --json
-```
-
-**Complete work:**
-
-```bash
-bd close bd-42 --reason "Completed" --json
-```
-
-### Issue Types
-
-- `bug` - Something broken
-- `feature` - New functionality
-- `task` - Work item (tests, docs, refactoring)
-- `epic` - Large feature with subtasks
-- `chore` - Maintenance (dependencies, tooling)
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
-
-### Workflow for AI Agents
-
-1. **Check ready work**: `bd ready` shows unblocked issues
-2. **Claim your task**: `bd update <id> --status in_progress`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** Create linked issue:
-   - `bd create "Found bug" --description="Details about what was found" -p 1 --deps discovered-from:<parent-id>`
-5. **Complete**: `bd close <id> --reason "Done"`
-
-### Auto-Sync
-
-bd automatically syncs with git:
-
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
-- Imports from JSONL when newer (e.g., after `git pull`)
-- No manual export/import needed!
-
-### Important Rules
-
-- ✅ Use bd for ALL task tracking
-- ✅ Always use `--json` flag for programmatic use
-- ✅ Link discovered work with `discovered-from` dependencies
-- ✅ Check `bd ready` before asking "what should I work on?"
-- ❌ Do NOT create markdown TODO lists
-- ❌ Do NOT use external issue trackers
-- ❌ Do NOT duplicate tracking systems
-
-For more details, see README.md and docs/QUICKSTART.md.
-
-<!-- END BEADS INTEGRATION -->
-Use 'bd' for task tracking
-
-<!-- bv-agent-instructions-v1 -->
-
----
-
-## Beads Workflow Integration
-
-This project uses [beads_viewer](https://github.com/Dicklesworthstone/beads_viewer) for issue tracking. Issues are stored in `.beads/` and tracked in git.
-
-### Essential Commands
-
-```bash
-# View issues (launches TUI - avoid in automated sessions)
-bv
-
-# CLI commands for agents (use these instead)
-bd ready              # Show issues ready to work (no blockers)
-bd list --status=open # All open issues
-bd show <id>          # Full issue details with dependencies
-bd create --title="..." --type=task --priority=2
-bd update <id> --status=in_progress
-bd close <id> --reason="Completed"
-bd close <id1> <id2>  # Close multiple issues at once
-bd sync               # Commit and push changes
-```
-
-### Workflow Pattern
-
-1. **Start**: Run `bd ready` to find actionable work
-2. **Claim**: Use `bd update <id> --status=in_progress`
-3. **Work**: Implement the task
-4. **Complete**: Use `bd close <id>`
-5. **Sync**: Always run `bd sync` at session end
-
-### Key Concepts
-
-- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
-- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers, not words)
-- **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: `bd dep add <issue> <depends-on>` to add dependencies
-
-### Session Protocol
-
-**Before ending any session, run this checklist:**
-
-```bash
-git status              # Check what changed
-git add <files>         # Stage code changes
-bd sync                 # Commit beads changes
-git commit -m "..."     # Commit code
-bd sync                 # Commit any new beads changes
-git push                # Push to remote
-```
-
-### Best Practices
-
-- Check `bd ready` at session start to find available work
-- Update status as you work (in_progress → closed)
-- Create new issues with `bd create` when you discover tasks
-- Use descriptive titles and set appropriate priority/type
-- Always `bd sync` before ending session
-
-<!-- end-bv-agent-instructions -->
+- `docs/agents/project-overview.md`
+- `docs/agents/repo-map.md`
+- `docs/agents/dev-environment.md`
+- `docs/agents/quality-gates.md`
+- `docs/agents/security.md`
+- `docs/agents/troubleshooting.md`
+- `docs/agents/workflows/how-to-use-bd.md`
+- `docs/agents/workflows/how-to-extend-the-project.md`
