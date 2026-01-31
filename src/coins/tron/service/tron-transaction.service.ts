@@ -8,6 +8,7 @@ import { BuildTronTransactionRequestDto } from '../dto/request/build-tron-transa
 import { TronTransferType } from '../dto/request/build-tron-transaction.request.dto';
 import { SignTronRawTransactionRequestDto } from '../dto/request/sign-tron-raw-transaction.request.dto';
 import { BuildTronTransactionResponseDto } from '../dto/response/build-tron-transaction.response.dto';
+import { SignTronTransactionResponseDto } from '../dto/response/sign-tron-transaction.response.dto';
 
 @Injectable()
 export class TronTransactionService implements CoinTransactionService<
@@ -34,11 +35,10 @@ export class TronTransactionService implements CoinTransactionService<
       expiration: request.expiration,
       feeLimit: request.feeLimit,
       memo: request.memo,
-      privateKey: request.privateKey,
     };
 
     const result: TronBuildTransactionAdapterResponse =
-      this.tronTransactionAdapter.buildTransfer(adapterRequest);
+      this.tronTransactionAdapter.buildTransaction(adapterRequest);
 
     return result;
   }
@@ -55,7 +55,7 @@ export class TronTransactionService implements CoinTransactionService<
 
   signRawTransaction(
     request: SignTronRawTransactionRequestDto,
-  ): BuildTronTransactionResponseDto {
+  ): SignTronTransactionResponseDto {
     this.logger.log('Signing TRON raw transaction');
     const adapterRequest: TronSignRawTransactionAdapterRequest = {
       rawJson: request.rawJson,
@@ -63,15 +63,15 @@ export class TronTransactionService implements CoinTransactionService<
       txId: request.txId,
     };
 
-    const result: TronBuildTransactionAdapterResponse =
-      this.tronTransactionAdapter.buildTransaction(adapterRequest);
+    const result: SignTronTransactionResponseDto =
+      this.tronTransactionAdapter.signTransaction(adapterRequest);
 
     return result;
   }
 
   signRawTransfer(
     request: SignTronRawTransactionRequestDto,
-  ): BuildTronTransactionResponseDto {
+  ): SignTronTransactionResponseDto {
     this.logger.log('Signing TRON raw transfer');
     this.ensureTransferContract(request.rawJson);
     return this.signRawTransaction(request);
@@ -89,8 +89,18 @@ export class TronTransactionService implements CoinTransactionService<
   private resolveContractType(rawJson: string): string | undefined {
     try {
       const parsed = JSON.parse(rawJson) as {
+        transfer?: Record<string, unknown>;
+        transferAsset?: Record<string, unknown>;
         raw_data?: { contract?: Array<{ type?: string; parameter?: any }> };
       };
+
+      if (parsed?.transfer) {
+        return 'TransferContract';
+      }
+      if (parsed?.transferAsset) {
+        return 'TransferAssetContract';
+      }
+
       const contract = parsed?.raw_data?.contract?.[0];
       if (!contract) return undefined;
       if (typeof contract.type === 'string') {

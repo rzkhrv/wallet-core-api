@@ -15,6 +15,7 @@ Introduce new functionality without breaking conventions, tests, or adapter isol
    - Keep wallet-core access inside adapters.
    - Wrap failures with `AdapterError`.
    - Release wallet-core objects in `finally` via `.delete()`.
+   - Keep build and sign flows separate (build endpoints must not require private keys).
 4. Implement API module in `src/coins/<coin>/`.
    - Controllers use Swagger decorators.
    - Services map API DTOs to adapter DTOs.

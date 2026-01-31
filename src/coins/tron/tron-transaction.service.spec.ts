@@ -13,7 +13,10 @@ describe('TRON transaction service', () => {
     raw_data: { contract: [{ type: 'VoteWitnessContract' }] },
   });
 
-  const mockResponse = {
+  const buildResponse = {
+    rawJson: '{"transfer":{}}',
+  };
+  const signResponse = {
     txId: 'aa',
     signature: 'bb',
     refBlockBytes: 'cc',
@@ -23,8 +26,8 @@ describe('TRON transaction service', () => {
 
   const makeService = () => {
     const adapter = {
-      buildTransaction: jest.fn().mockReturnValue(mockResponse),
-      buildTransfer: jest.fn().mockReturnValue(mockResponse),
+      buildTransaction: jest.fn().mockReturnValue(buildResponse),
+      signTransaction: jest.fn().mockReturnValue(signResponse),
     } as unknown as TronTransactionAdapter;
     return {
       adapter,
@@ -38,11 +41,10 @@ describe('TRON transaction service', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
-      privateKey: '00'.repeat(32),
     });
 
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransfer).toHaveBeenCalledWith(
+    expect(result).toBe(buildResponse);
+    expect(adapter.buildTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         transferType: 'trx',
       }),
@@ -57,11 +59,10 @@ describe('TRON transaction service', () => {
       toAddress: 'TABC',
       amount: '100',
       assetName: 'TOKEN',
-      privateKey: '00'.repeat(32),
     });
 
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransfer).toHaveBeenCalledWith(
+    expect(result).toBe(buildResponse);
+    expect(adapter.buildTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         transferType: 'trc10',
         assetName: 'TOKEN',
@@ -76,8 +77,8 @@ describe('TRON transaction service', () => {
       privateKey: '00'.repeat(32),
     });
 
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledTimes(1);
+    expect(result).toBe(signResponse);
+    expect(adapter.signTransaction).toHaveBeenCalledTimes(1);
   });
 
   it('signs raw transaction when rawJson is provided', () => {
@@ -88,8 +89,8 @@ describe('TRON transaction service', () => {
       txId: 'txid',
     });
 
-    expect(result).toBe(mockResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+    expect(result).toBe(signResponse);
+    expect(adapter.signTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         rawJson: transferJson,
         privateKey: '00'.repeat(32),

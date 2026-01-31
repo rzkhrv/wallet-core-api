@@ -2,7 +2,7 @@ import { TronTransactionAdapter } from '../../adapter/coins/tron/tron-transactio
 import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
 import { AdapterError } from '../../adapter/common/adapter-error';
 
-describe('TRON transaction signing', () => {
+describe('TRON transaction build/signing', () => {
   let walletCore: WalletCoreAdapter;
   let transactionAdapter: TronTransactionAdapter;
 
@@ -12,7 +12,7 @@ describe('TRON transaction signing', () => {
     transactionAdapter = new TronTransactionAdapter(walletCore);
   });
 
-  it('builds and signs TRON transfer (adapter)', () => {
+  it('builds TRON transfer without signing (adapter)', () => {
     const core = walletCore.getCore();
     const wallet = core.HDWallet.create(128, '');
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
@@ -29,20 +29,28 @@ describe('TRON transaction signing', () => {
       amount: '1',
       timestamp: `${now}`,
       expiration: `${now + 60_000}`,
+    });
+
+    expect(result.rawJson).toBeDefined();
+    const parsed = JSON.parse(result.rawJson);
+    expect(parsed.transfer).toBeDefined();
+
+    const signed = transactionAdapter.signTransaction({
+      rawJson: result.rawJson,
       privateKey,
     });
 
-    expect(result.txId).toBeDefined();
-    expect(result.signature).toBeDefined();
-    expect(result.signedJson).toBeDefined();
+    expect(signed.txId).toBeDefined();
+    expect(signed.signature).toBeDefined();
+    expect(signed.signedJson).toBeDefined();
 
     wallet.delete();
   });
 
-  it('throws when transaction input is missing', () => {
+  it('throws when rawJson is invalid', () => {
     expect(() =>
-      transactionAdapter.buildTransaction({
-        rawJson: '',
+      transactionAdapter.signTransaction({
+        rawJson: '{invalid',
         privateKey: '00'.repeat(32),
       }),
     ).toThrow(AdapterError);

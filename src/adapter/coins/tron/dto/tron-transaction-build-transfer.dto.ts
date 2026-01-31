@@ -10,5 +10,4 @@ export interface TronBuildTransferAdapterRequest {
   expiration?: string;
   feeLimit?: string;
   memo?: string;
-  privateKey: string;
 }

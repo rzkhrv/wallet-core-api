@@ -11,11 +11,14 @@ import {
   TronBuildTransactionAdapterResponse,
 } from './dto/tron-transaction-build.dto';
 import { TronBuildTransferAdapterRequest } from './dto/tron-transaction-build-transfer.dto';
-import { TronSignRawTransactionAdapterRequest } from './dto/tron-transaction-sign-raw.dto';
+import {
+  TronSignRawTransactionAdapterRequest,
+  TronSignRawTransactionAdapterResponse,
+} from './dto/tron-transaction-sign-raw.dto';
 
 @Injectable()
 export class TronTransactionAdapter implements CoinTransactionAdapter<
-  TronSignRawTransactionAdapterRequest,
+  TronBuildTransactionAdapterRequest,
   TronBuildTransactionAdapterResponse,
   TronBuildTransferAdapterRequest,
   TronBuildTransactionAdapterResponse
@@ -24,22 +27,18 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
 
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
-  buildTransaction(
-    input: TronSignRawTransactionAdapterRequest,
-  ): TronBuildTransactionAdapterResponse {
-    this.logger.log('Signing TRON raw transaction');
-    return this.signTransaction({
-      rawJson: input.rawJson,
-      txId: input.txId,
-      privateKey: input.privateKey,
-    });
-  }
-
   buildTransfer(
     input: TronBuildTransferAdapterRequest,
   ): TronBuildTransactionAdapterResponse {
-    this.logger.log('Building and signing TRON transfer');
-    const transferType = input.transferType;
+    this.logger.log('Building TRON transfer');
+    return this.buildTransaction(input);
+  }
+
+  buildTransaction(
+    input: TronBuildTransactionAdapterRequest,
+  ): TronBuildTransactionAdapterResponse {
+    this.logger.log('Building TRON transaction');
+    const transferType = input.transferType ?? 'trx';
     const now = Date.now();
     const timestamp = input.timestamp
       ? Long.fromString(input.timestamp)
@@ -86,30 +85,24 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
       });
     }
 
-    return this.signTransaction({
-      transaction,
-      privateKey: input.privateKey,
-    });
+    return {
+      rawJson: JSON.stringify(transaction.toJSON()),
+    };
   }
 
-  private signTransaction(
-    input: TronBuildTransactionAdapterRequest,
-  ): TronBuildTransactionAdapterResponse {
+  signTransaction(
+    input: TronSignRawTransactionAdapterRequest,
+  ): TronSignRawTransactionAdapterResponse {
     const core = this.walletCore.getCore();
     const { coinType } = resolveCoinConfig(core, Coin.TRON);
 
-    if (!input.rawJson && !input.transaction) {
-      throw new AdapterError(
-        'TRON_TRANSACTION_INPUT_MISSING',
-        'TRON transaction input is missing',
-      );
-    }
+    const resolvedInput = this.resolveSigningInput(input.rawJson);
 
     try {
       const signingInput = TW.Tron.Proto.SigningInput.create({
-        rawJson: input.rawJson ?? '',
+        rawJson: resolvedInput.rawJson,
         txId: input.txId ?? '',
-        transaction: input.transaction,
+        transaction: resolvedInput.transaction,
         privateKey: core.HexCoding.decode(this.normalizeHex(input.privateKey)),
       });
 
@@ -141,11 +134,32 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
         throw error;
       }
       throw new AdapterError(
-        'TRON_TRANSACTION_BUILD_FAILED',
-        'TRON transaction build failed',
+        'TRON_TRANSACTION_SIGN_FAILED',
+        'TRON transaction signing failed',
         {
           cause: error instanceof Error ? error.message : error,
         },
+      );
+    }
+  }
+
+  private resolveSigningInput(rawJson: string): {
+    rawJson: string;
+    transaction?: TW.Tron.Proto.ITransaction;
+  } {
+    try {
+      const parsed = JSON.parse(rawJson) as Record<string, unknown>;
+      if (parsed?.raw_data) {
+        return { rawJson };
+      }
+      return {
+        rawJson: '',
+        transaction: TW.Tron.Proto.Transaction.fromObject(parsed),
+      };
+    } catch {
+      throw new AdapterError(
+        'TRON_RAW_JSON_INVALID',
+        'TRON raw JSON is invalid',
       );
     }
   }

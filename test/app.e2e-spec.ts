@@ -154,16 +154,11 @@ describe('Wallet Core API (e2e)', () => {
         ownerAddress: tronAddress,
         toAddress: tronAddress,
         amount: '1',
-        privateKey: tronPrivateKey,
       })
       .expect(201);
 
-    expect(response.body.signedJson).toBeDefined();
-    expect(response.body.txId).toBeDefined();
-
-    const parsedJson = JSON.parse(response.body.signedJson);
-    delete parsedJson.signature;
-    tronRawJson = JSON.stringify(parsedJson);
+    expect(response.body.rawJson).toBeDefined();
+    tronRawJson = response.body.rawJson;
   });
 
   it('POST /api/v1/transaction/tron/sign-transfer', async () => {
@@ -317,24 +312,22 @@ describe('Wallet Core API (e2e)', () => {
     expect(signResponse.body.signature?.v).toBeDefined();
   });
 
-  it('POST /api/v1/transaction/tron/build-transfer rejects smart contract', async () => {
+  it('POST /api/v1/transaction/tron/build-transfer rejects unexpected rawJson', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/build-transfer')
       .send({
         rawJson: JSON.stringify({
           raw_data: { contract: [{ type: 'TriggerSmartContract' }] },
         }),
-        privateKey: '00'.repeat(32),
       })
       .expect(400);
   });
 
-  it('POST /api/v1/transaction/tron/build-transaction rejects invalid json', async () => {
+  it('POST /api/v1/transaction/tron/build-transaction rejects unexpected rawJson', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/build-transaction')
       .send({
         rawJson: '{invalid',
-        privateKey: '00'.repeat(32),
       })
       .expect(400);
   });
