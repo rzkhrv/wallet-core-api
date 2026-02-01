@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BtcAddressGenerateAdapterRequest } from '../../../adapter/coins/btc/dto/btc-address-generate.dto';
-import { BtcAddressGenerateAdapterResponse } from '../../../adapter/coins/btc/dto/btc-address-generate-response.dto';
-import { BtcAddressValidateAdapterRequest } from '../../../adapter/coins/btc/dto/btc-address-validate.dto';
-import { BtcAddressValidateAdapterResponse } from '../../../adapter/coins/btc/dto/btc-address-validate-response.dto';
-import { BtcAddressAdapter } from '../../../adapter/coins/btc/btc-address.adapter';
-import { CoinAddressService } from '../../contracts/coin-address-service.interface';
+import { BtcAddressGenerateAdapterInput } from '../adapter/dto/btc-address-generate-input.dto';
+import { BtcAddressGenerateAdapterOutput } from '../adapter/dto/btc-address-generate-output.dto';
+import { BtcAddressValidateAdapterInput } from '../adapter/dto/btc-address-validate-input.dto';
+import { BtcAddressValidateAdapterOutput } from '../adapter/dto/btc-address-validate-output.dto';
+import { BtcAddressAdapter } from '../adapter/btc-address.adapter';
+import { CoinAddressService } from '../../../common/interfaces/coin-address-service.interface';
 import { GenerateBtcAddressRequestDto } from '../dto/request/generate-btc-address.request.dto';
 import { ValidateBtcAddressRequestDto } from '../dto/request/validate-btc-address.request.dto';
 import { GenerateBtcAddressResponseDto } from '../dto/response/generate-btc-address.response.dto';
@@ -35,7 +35,7 @@ export class BtcAddressService implements CoinAddressService<
     this.logger.log(
       `Generating BTC address (account=${request.derivation.account}, change=${request.derivation.change}, index=${request.derivation.index})`,
     );
-    const adapterRequest: BtcAddressGenerateAdapterRequest = {
+    const adapterRequest: BtcAddressGenerateAdapterInput = {
       mnemonic: {
         value: request.mnemonic.value,
         passphrase: request.mnemonic.passphrase ?? '',
@@ -47,7 +47,7 @@ export class BtcAddressService implements CoinAddressService<
       },
     };
 
-    const result: BtcAddressGenerateAdapterResponse =
+    const result: BtcAddressGenerateAdapterOutput =
       this.btcAddressAdapter.generate(adapterRequest);
 
     return result;
@@ -62,11 +62,11 @@ export class BtcAddressService implements CoinAddressService<
     request: ValidateBtcAddressRequestDto,
   ): ValidateBtcAddressResponseDto {
     this.logger.log('Validating BTC address');
-    const adapterRequest: BtcAddressValidateAdapterRequest = {
+    const adapterRequest: BtcAddressValidateAdapterInput = {
       address: request.address,
     };
 
-    const result: BtcAddressValidateAdapterResponse =
+    const result: BtcAddressValidateAdapterOutput =
       this.btcAddressAdapter.validate(adapterRequest);
 
     return result;

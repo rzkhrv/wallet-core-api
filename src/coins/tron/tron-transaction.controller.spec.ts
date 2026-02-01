@@ -13,13 +13,14 @@ describe('TronTransactionController', () => {
           useValue: {
             buildTransaction: jest.fn(),
             buildTransfer: jest.fn(),
-            signRawTransaction: jest.fn(),
-            signRawTransfer: jest.fn(),
+            sign: jest.fn(),
           },
         },
       ],
     }).compile();
-    controller = module.get<TronTransactionController>(TronTransactionController);
+    controller = module.get<TronTransactionController>(
+      TronTransactionController,
+    );
   });
   it('returns admin test status', () => {
     const result: { status: string } = controller.adminTest();

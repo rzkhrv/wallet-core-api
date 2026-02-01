@@ -35,7 +35,7 @@ export class BtcAddressService {
   constructor(private readonly btcAddressAdapter: BtcAddressAdapter) {}
 
   generate(request: GenerateBtcAddressRequestDto): GenerateBtcAddressResponseDto {
-    const adapterRequest: BtcAddressGenerateAdapterRequest = {
+    const adapterInput: BtcAddressGenerateAdapterInput = {
       mnemonic: { value: request.mnemonic.value, passphrase: request.mnemonic.passphrase ?? '' },
       derivation: {
         account: request.derivation.account,
@@ -43,7 +43,7 @@ export class BtcAddressService {
         index: request.derivation.index,
       },
     };
-    return this.btcAddressAdapter.generate(adapterRequest);
+    return this.btcAddressAdapter.generate(adapterInput);
   }
 }
 ```
@@ -56,6 +56,6 @@ export class BtcAddressService {
 ## References
 - `src/coins/btc/btc-address.controller.ts`
 - `src/coins/btc/service/btc-address.service.ts`
-- `src/adapter/coins/btc/btc-address.adapter.ts`
+- `src/coins/btc/adapter/btc-address.adapter.ts`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

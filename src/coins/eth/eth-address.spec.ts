@@ -1,6 +1,6 @@
-import { EthAddressAdapter } from '../../adapter/coins/eth/eth-address.adapter';
-import { MnemonicAdapter } from '../../adapter/common/mnemonic.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
+import { EthAddressAdapter } from './adapter/eth-address.adapter';
+import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { EthAddressService } from './service/eth-address.service';
 
 describe('ETH address flows', () => {

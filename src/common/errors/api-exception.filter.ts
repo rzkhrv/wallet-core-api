@@ -6,7 +6,8 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { AdapterError } from '../../adapter/common/adapter-error';
+import type { Response } from 'express';
+import { AdapterError } from './adapter-error';
 import { ApiErrorResponse } from './api-error-response';
 
 const STATUS_CODE_MAP: Record<number, string> = {
@@ -25,7 +26,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
+    const response = ctx.getResponse<Response>();
 
     const { status, body } = this.normalizeException(exception);
     if (status >= 500) {

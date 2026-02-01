@@ -1,9 +1,8 @@
-import { BtcAddressAdapter } from '../../adapter/coins/btc/btc-address.adapter';
-import { BtcTransactionAdapter } from '../../adapter/coins/btc/btc-transaction.adapter';
-import { MnemonicAdapter } from '../../adapter/common/mnemonic.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
-import { resolveCoinConfig } from '../coin.config';
-import { Coin } from '../enum/coin.enum';
+import { BtcAddressAdapter } from './adapter/btc-address.adapter';
+import { BtcTransactionAdapter } from './adapter/btc-transaction.adapter';
+import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
+import { resolveBtcWalletCoreConfig } from './btc-wallet-core.config';
 
 describe('BTC transaction signing', () => {
   let walletCore: WalletCoreAdapter;
@@ -34,7 +33,7 @@ describe('BTC transaction signing', () => {
     });
 
     const core = walletCore.getCore();
-    const { coinType } = resolveCoinConfig(core, Coin.BTC);
+    const { coinType } = resolveBtcWalletCoreConfig(core);
     const script = core.BitcoinScript.lockScriptForAddress(
       utxoAddress.address,
       coinType,

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BtcBuildTransactionAdapterRequest } from '../../../adapter/coins/btc/dto/btc-transaction-build.dto';
-import { BtcBuildTransactionAdapterResponse } from '../../../adapter/coins/btc/dto/btc-transaction-build-response.dto';
-import { BtcSignTransactionAdapterRequest } from '../../../adapter/coins/btc/dto/btc-transaction-sign.dto';
-import { BtcSignTransactionAdapterResponse } from '../../../adapter/coins/btc/dto/btc-transaction-sign-response.dto';
-import { BtcTransactionAdapter } from '../../../adapter/coins/btc/btc-transaction.adapter';
-import { CoinTransactionService } from '../../contracts/coin-transaction-service.interface';
+import { BtcBuildTransactionAdapterInput } from '../adapter/dto/btc-transaction-build-input.dto';
+import { BtcBuildTransactionAdapterOutput } from '../adapter/dto/btc-transaction-build-output.dto';
+import { BtcSignTransactionAdapterInput } from '../adapter/dto/btc-transaction-sign-input.dto';
+import { BtcSignTransactionAdapterOutput } from '../adapter/dto/btc-transaction-sign-output.dto';
+import { BtcTransactionAdapter } from '../adapter/btc-transaction.adapter';
+import { CoinTransactionService } from '../../../common/interfaces/coin-transaction-service.interface';
 import { BuildBtcTransactionRequestDto } from '../dto/request/build-btc-transaction.request.dto';
 import { SignBtcTransactionRequestDto } from '../dto/request/sign-btc-transaction.request.dto';
 import { BuildBtcTransactionResponseDto } from '../dto/response/build-btc-transaction.response.dto';
@@ -31,7 +31,7 @@ export class BtcTransactionService implements CoinTransactionService<
     request: BuildBtcTransactionRequestDto,
   ): BuildBtcTransactionResponseDto {
     this.logger.log('Building BTC transaction');
-    const adapterRequest: BtcBuildTransactionAdapterRequest = {
+    const adapterRequest: BtcBuildTransactionAdapterInput = {
       toAddress: request.toAddress,
       changeAddress: request.changeAddress,
       amount: request.amount,
@@ -47,7 +47,7 @@ export class BtcTransactionService implements CoinTransactionService<
       useMaxAmount: request.useMaxAmount,
     };
 
-    const result: BtcBuildTransactionAdapterResponse =
+    const result: BtcBuildTransactionAdapterOutput =
       this.btcTransactionAdapter.buildTransaction(adapterRequest);
 
     return result;
@@ -58,16 +58,14 @@ export class BtcTransactionService implements CoinTransactionService<
    * @param request Request payload.
    * @returns Signed transaction response.
    */
-  signTransaction(
-    request: SignBtcTransactionRequestDto,
-  ): SignBtcTransactionResponseDto {
+  sign(request: SignBtcTransactionRequestDto): SignBtcTransactionResponseDto {
     this.logger.log('Signing BTC transaction');
-    const adapterRequest: BtcSignTransactionAdapterRequest = {
+    const adapterRequest: BtcSignTransactionAdapterInput = {
       payload: request.payload,
       privateKeys: request.privateKeys,
     };
 
-    const result: BtcSignTransactionAdapterResponse =
+    const result: BtcSignTransactionAdapterOutput =
       this.btcTransactionAdapter.signTransaction(adapterRequest);
 
     return result;

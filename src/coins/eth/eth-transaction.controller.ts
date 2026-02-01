@@ -2,11 +2,9 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BuildEthErc20TransferRequestDto } from './dto/request/build-eth-erc20-transfer.request.dto';
 import { BuildEthTransactionRequestDto } from './dto/request/build-eth-transaction.request.dto';
-import { SignEthErc20TransferRequestDto } from './dto/request/sign-eth-erc20-transfer.request.dto';
 import { SignEthTransactionRequestDto } from './dto/request/sign-eth-transaction.request.dto';
 import { BuildEthErc20TransferResponseDto } from './dto/response/build-eth-erc20-transfer.response.dto';
 import { BuildEthTransactionResponseDto } from './dto/response/build-eth-transaction.response.dto';
-import { SignEthErc20TransferResponseDto } from './dto/response/sign-eth-erc20-transfer.response.dto';
 import { SignEthTransactionResponseDto } from './dto/response/sign-eth-transaction.response.dto';
 import { EthTransactionService } from './service/eth-transaction.service';
 
@@ -59,31 +57,15 @@ export class EthTransactionController {
    * @param body Request payload.
    * @returns Signed transaction response.
    */
-  @Post('sign-transaction')
-  @ApiOperation({ summary: 'Sign ETH transaction from build payload' })
+  @Post('sign')
+  @ApiOperation({ summary: 'Sign ETH transaction or ERC20 transfer' })
   @ApiBody({ type: SignEthTransactionRequestDto })
   @ApiResponse({ status: 201, type: SignEthTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  signTransaction(
+  sign(
     @Body() body: SignEthTransactionRequestDto,
   ): SignEthTransactionResponseDto {
-    return this.ethTransactionService.signTransaction(body);
-  }
-
-  /**
-   * Signs an ERC20 transfer payload.
-   * @param body Request payload.
-   * @returns Signed transfer response.
-   */
-  @Post('sign-transfer')
-  @ApiOperation({ summary: 'Sign ETH ERC20 transfer from build payload' })
-  @ApiBody({ type: SignEthErc20TransferRequestDto })
-  @ApiResponse({ status: 201, type: SignEthErc20TransferResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  signTransfer(
-    @Body() body: SignEthErc20TransferRequestDto,
-  ): SignEthErc20TransferResponseDto {
-    return this.ethTransactionService.signTransfer(body);
+    return this.ethTransactionService.sign(body);
   }
 
   /**

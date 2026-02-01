@@ -1,7 +1,7 @@
 import type { WalletCore } from '@trustwallet/wallet-core';
-import { TronTransactionAdapter } from '../../adapter/coins/tron/tron-transaction.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
-import { AdapterError } from '../../adapter/common/adapter-error';
+import { TronTransactionAdapter } from './adapter/tron-transaction.adapter';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
+import { AdapterError } from '../../common/errors/adapter-error';
 
 const resolveTrc20Amount = (rawJson: string): bigint => {
   const parsed: Record<string, unknown> = JSON.parse(rawJson) as Record<
@@ -36,7 +36,7 @@ describe('TRON transaction build/signing', () => {
     transactionAdapter = new TronTransactionAdapter(walletCore);
   });
 
-  it('builds TRON transfer without signing (adapter)', () => {
+  it('builds TRON TRX transaction without signing (adapter)', () => {
     const core = walletCore.getCore();
     const wallet = core.HDWallet.create(128, '');
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
@@ -46,8 +46,7 @@ describe('TRON transaction build/signing', () => {
     );
 
     const now = Date.now();
-    const result = transactionAdapter.buildTransfer({
-      transferType: 'trx',
+    const result = transactionAdapter.buildTransaction({
       ownerAddress,
       toAddress: recipientAddress,
       amount: '1',
@@ -56,7 +55,7 @@ describe('TRON transaction build/signing', () => {
     });
 
     expect(result.rawJson).toBeDefined();
-    const parsed = JSON.parse(result.rawJson);
+    const parsed = JSON.parse(result.rawJson) as { transfer?: unknown };
     expect(parsed.transfer).toBeDefined();
 
     const signed = transactionAdapter.signTransaction({
@@ -81,7 +80,7 @@ describe('TRON transaction build/signing', () => {
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
 
-    const result = transactionAdapter.buildTransaction({
+    const result = transactionAdapter.buildTransfer({
       transferType: 'trc20',
       ownerAddress,
       toAddress: recipientAddress,
@@ -92,10 +91,15 @@ describe('TRON transaction build/signing', () => {
     });
 
     expect(result.rawJson).toBeDefined();
-    const parsed = JSON.parse(result.rawJson);
+    const parsed = JSON.parse(result.rawJson) as {
+      triggerSmartContract?: { data?: string | number[] };
+    };
     expect(parsed.triggerSmartContract).toBeDefined();
-    const data = parsed.triggerSmartContract.data as string | number[];
+    const data = parsed.triggerSmartContract?.data;
     expect(data).toBeDefined();
+    if (!data) {
+      throw new Error('TRC20 transfer data missing');
+    }
     const dataBuffer = Array.isArray(data)
       ? Buffer.from(data)
       : Buffer.from(data, 'base64');
@@ -120,7 +124,7 @@ describe('TRON transaction build/signing', () => {
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const decimalRawJson: string = transactionAdapter.buildTransaction({
+    const decimalRawJson: string = transactionAdapter.buildTransfer({
       transferType: 'trc20',
       ownerAddress,
       toAddress: recipientAddress,
@@ -131,7 +135,7 @@ describe('TRON transaction build/signing', () => {
     }).rawJson;
     const decimalAmount: bigint = resolveTrc20Amount(decimalRawJson);
     expect(decimalAmount).toBe(10n);
-    const hexRawJson: string = transactionAdapter.buildTransaction({
+    const hexRawJson: string = transactionAdapter.buildTransfer({
       transferType: 'trc20',
       ownerAddress,
       toAddress: recipientAddress,

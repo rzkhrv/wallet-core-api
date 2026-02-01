@@ -10,7 +10,7 @@ describe('BtcTransactionController', () => {
       providers: [
         {
           provide: BtcTransactionService,
-          useValue: { buildTransaction: jest.fn(), signTransaction: jest.fn() },
+          useValue: { buildTransaction: jest.fn(), sign: jest.fn() },
         },
       ],
     }).compile();

@@ -8,10 +8,9 @@ Introduce new functionality without breaking conventions, tests, or adapter isol
 
 ## Steps
 1. Create Beads tasks for the extension (feature epic + subtasks).
-2. Update coin identifiers and config if adding a new coin:
-   - `src/coins/enum/coin.enum.ts`
-   - `src/coins/coin.config.ts`
-3. Implement adapters in `src/adapter/coins/<coin>/`.
+2. Add per-coin wallet-core configuration:
+   - Create `src/coins/<coin>/*-wallet-core.config.ts` with coin type, purpose, and derivation keys.
+3. Implement adapters in `src/coins/<coin>/adapter/`.
    - Keep wallet-core access inside adapters.
    - Wrap failures with `AdapterError`.
    - Release wallet-core objects in `finally` via `.delete()`.
@@ -21,7 +20,7 @@ Introduce new functionality without breaking conventions, tests, or adapter isol
    - Services map API DTOs to adapter DTOs.
 5. Register modules/adapters:
    - `src/coins/coins.module.ts`
-   - `src/adapter/adapter.module.ts`
+   - Register coin adapters in `<coin>.module.ts` (no AdapterModule changes required).
 6. Add tests:
    - Unit/integration specs in `src/coins/<coin>/**/*.spec.ts`.
    - E2E coverage in `test/*.e2e-spec.ts`.
@@ -46,7 +45,7 @@ Introduce new functionality without breaking conventions, tests, or adapter isol
 - `docs/COINS.md`
 - `docs/WORKFLOW.md`
 - `src/coins/`
-- `src/adapter/`
+- `src/coins/<coin>/adapter/`
 - `test/`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

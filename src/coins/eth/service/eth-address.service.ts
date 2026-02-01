@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EthAddressGenerateAdapterRequest } from '../../../adapter/coins/eth/dto/eth-address-generate.dto';
-import { EthAddressGenerateAdapterResponse } from '../../../adapter/coins/eth/dto/eth-address-generate-response.dto';
-import { EthAddressValidateAdapterRequest } from '../../../adapter/coins/eth/dto/eth-address-validate.dto';
-import { EthAddressValidateAdapterResponse } from '../../../adapter/coins/eth/dto/eth-address-validate-response.dto';
-import { EthAddressAdapter } from '../../../adapter/coins/eth/eth-address.adapter';
-import { CoinAddressService } from '../../contracts/coin-address-service.interface';
+import { EthAddressGenerateAdapterInput } from '../adapter/dto/eth-address-generate-input.dto';
+import { EthAddressGenerateAdapterOutput } from '../adapter/dto/eth-address-generate-output.dto';
+import { EthAddressValidateAdapterInput } from '../adapter/dto/eth-address-validate-input.dto';
+import { EthAddressValidateAdapterOutput } from '../adapter/dto/eth-address-validate-output.dto';
+import { EthAddressAdapter } from '../adapter/eth-address.adapter';
+import { CoinAddressService } from '../../../common/interfaces/coin-address-service.interface';
 import { GenerateEthAddressRequestDto } from '../dto/request/generate-eth-address.request.dto';
 import { ValidateEthAddressRequestDto } from '../dto/request/validate-eth-address.request.dto';
 import { GenerateEthAddressResponseDto } from '../dto/response/generate-eth-address.response.dto';
@@ -35,7 +35,7 @@ export class EthAddressService implements CoinAddressService<
     this.logger.log(
       `Generating ETH address (account=${request.derivation.account}, change=${request.derivation.change}, index=${request.derivation.index})`,
     );
-    const adapterRequest: EthAddressGenerateAdapterRequest = {
+    const adapterRequest: EthAddressGenerateAdapterInput = {
       mnemonic: {
         value: request.mnemonic.value,
         passphrase: request.mnemonic.passphrase ?? '',
@@ -47,7 +47,7 @@ export class EthAddressService implements CoinAddressService<
       },
     };
 
-    const result: EthAddressGenerateAdapterResponse =
+    const result: EthAddressGenerateAdapterOutput =
       this.ethAddressAdapter.generate(adapterRequest);
 
     return result;
@@ -62,11 +62,11 @@ export class EthAddressService implements CoinAddressService<
     request: ValidateEthAddressRequestDto,
   ): ValidateEthAddressResponseDto {
     this.logger.log('Validating ETH address');
-    const adapterRequest: EthAddressValidateAdapterRequest = {
+    const adapterRequest: EthAddressValidateAdapterInput = {
       address: request.address,
     };
 
-    const result: EthAddressValidateAdapterResponse =
+    const result: EthAddressValidateAdapterOutput =
       this.ethAddressAdapter.validate(adapterRequest);
 
     return result;

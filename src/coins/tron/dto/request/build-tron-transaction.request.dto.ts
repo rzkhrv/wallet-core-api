@@ -1,32 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBase58,
-  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   Matches,
-  ValidateIf,
 } from 'class-validator';
 
 const NUMERIC_STRING_REGEX = /^(?:[0-9]+|0[xX][0-9a-fA-F]+)$/;
 
-export enum TronTransferType {
-  TRX = 'trx',
-  TRC10 = 'trc10',
-  TRC20 = 'trc20',
-}
-
 export class BuildTronTransactionRequestDto {
-  @ApiPropertyOptional({
-    example: 'trx',
-    description: 'Transfer type (trx, trc10, trc20). Defaults to trx.',
-  })
-  @IsOptional()
-  @IsIn([TronTransferType.TRX, TronTransferType.TRC10, TronTransferType.TRC20])
-  transferType?: TronTransferType;
-
   @ApiProperty({
     example: 'TLyqzVGLV1srkB7dToTAqVwC6L3w1V3U2p',
     description: 'Sender TRON address',
@@ -51,54 +35,12 @@ export class BuildTronTransactionRequestDto {
 
   @ApiProperty({
     example: '1000000',
-    description:
-      'Amount in SUN (trx) or asset units (trc10/trc20), decimal or 0x-prefixed hex',
+    description: 'Amount in SUN (decimal or 0x-prefixed hex)',
   })
   @Matches(NUMERIC_STRING_REGEX)
   @IsString()
   @IsNotEmpty()
   amount: string;
-
-  @ApiPropertyOptional({
-    example: 'USDT',
-    description: 'TRC10 asset name (required for trc10 transfers)',
-  })
-  @ValidateIf(
-    (value: BuildTronTransactionRequestDto) =>
-      (value.transferType ?? TronTransferType.TRX) === TronTransferType.TRC10,
-  )
-  @IsString()
-  @IsNotEmpty()
-  assetName?: string;
-
-  @ApiPropertyOptional({
-    example: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
-    description: 'TRC20 contract address (required for trc20 transfers)',
-  })
-  @ValidateIf(
-    (value: BuildTronTransactionRequestDto) =>
-      (value.transferType ?? TronTransferType.TRX) === TronTransferType.TRC20,
-  )
-  @IsBase58()
-  @Length(34, 34)
-  @Matches(/^T/)
-  @IsString()
-  @IsNotEmpty()
-  contractAddress?: string;
-
-  @ApiPropertyOptional({
-    example: '0',
-    description:
-      'TRX call value in SUN (used for trc20 smart contract calls), decimal or 0x-prefixed hex',
-  })
-  @ValidateIf(
-    (value: BuildTronTransactionRequestDto) =>
-      (value.transferType ?? TronTransferType.TRX) === TronTransferType.TRC20,
-  )
-  @IsOptional()
-  @Matches(NUMERIC_STRING_REGEX)
-  @IsString()
-  callValue?: string;
 
   @ApiPropertyOptional({
     example: '1738253400000',

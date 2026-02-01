@@ -1,6 +1,6 @@
-import { TronAddressAdapter } from '../../adapter/coins/tron/tron-address.adapter';
-import { MnemonicAdapter } from '../../adapter/common/mnemonic.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
+import { TronAddressAdapter } from './adapter/tron-address.adapter';
+import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { TronAddressService } from './service/tron-address.service';
 
 describe('TRON address flows', () => {

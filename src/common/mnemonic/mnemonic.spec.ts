@@ -1,5 +1,5 @@
-import { MnemonicAdapter } from '../../adapter/common/mnemonic.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
+import { MnemonicAdapter } from './adapter/mnemonic.adapter';
+import { WalletCoreAdapter } from '../wallet-core/wallet-core.adapter';
 import { MnemonicService } from './mnemonic.service';
 
 describe('Mnemonic flows', () => {

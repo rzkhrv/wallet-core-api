@@ -13,8 +13,7 @@ describe('EthTransactionController', () => {
           useValue: {
             buildTransaction: jest.fn(),
             buildTransfer: jest.fn(),
-            signTransaction: jest.fn(),
-            signTransfer: jest.fn(),
+            sign: jest.fn(),
           },
         },
       ],

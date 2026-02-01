@@ -19,8 +19,9 @@ Prevent secrets from leaking and keep error responses consistent.
 
 ## References
 - `src/common/errors/api-exception.filter.ts`
-- `src/adapter/common/adapter-error.ts`
-- `src/adapter/coins/`
+- `src/common/errors/adapter-error.ts`
+- `src/common/wallet-core/wallet-core.adapter.ts`
+- `src/coins/<coin>/adapter/`
 - `src/main.ts`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

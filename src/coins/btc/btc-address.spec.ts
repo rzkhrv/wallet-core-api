@@ -1,6 +1,6 @@
-import { BtcAddressAdapter } from '../../adapter/coins/btc/btc-address.adapter';
-import { MnemonicAdapter } from '../../adapter/common/mnemonic.adapter';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
+import { BtcAddressAdapter } from './adapter/btc-address.adapter';
+import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { BtcAddressService } from './service/btc-address.service';
 
 describe('BTC address flows', () => {

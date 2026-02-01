@@ -39,15 +39,15 @@ export class BtcTransactionController {
    * @param body Request payload.
    * @returns Signed transaction data.
    */
-  @Post('sign-transaction')
+  @Post('sign')
   @ApiOperation({ summary: 'Sign BTC transaction from build payload' })
   @ApiBody({ type: SignBtcTransactionRequestDto })
   @ApiResponse({ status: 201, type: SignBtcTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  signTransaction(
+  sign(
     @Body() body: SignBtcTransactionRequestDto,
   ): SignBtcTransactionResponseDto {
-    return this.btcTransactionService.signTransaction(body);
+    return this.btcTransactionService.sign(body);
   }
 
   /**

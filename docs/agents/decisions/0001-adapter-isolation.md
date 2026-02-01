@@ -7,7 +7,7 @@ This service uses `@trustwallet/wallet-core` WASM and exposes REST endpoints via
 Prevent wallet-core usage from spreading across controllers/services and keep error handling consistent.
 
 ## Decision (steps)
-1. All wallet-core access lives inside adapter classes under `src/adapter/`.
+1. All wallet-core access lives inside adapter classes under `src/coins/<coin>/adapter/` and shared wrappers under `src/common/wallet-core/`.
 2. Services map API DTOs to adapter DTOs and call adapters only.
 3. Adapters wrap errors in `AdapterError` and release WASM objects in `finally`.
 
@@ -17,8 +17,8 @@ Prevent wallet-core usage from spreading across controllers/services and keep er
 
 ## References
 - `docs/PROJECT.md`
-- `src/adapter/`
 - `src/coins/`
-- `src/adapter/common/adapter-error.ts`
+- `src/common/wallet-core/`
+- `src/common/errors/adapter-error.ts`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

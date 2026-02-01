@@ -7,18 +7,17 @@
 
 ## Architecture map (where things live)
 - `src/main.ts` - application bootstrap, global validation pipe, global exception filter, Swagger setup.
-- `src/app.module.ts` - root Nest module; wires `AdapterModule`, `CoinsModule`, `CommonModule`.
-- `src/adapter/` - thin wrappers over wallet-core WASM:
-  - `src/adapter/common/wallet-core.adapter.ts` - loads WASM via `initWasm()` and exposes `WalletCore` API.
-  - `src/adapter/coins/<coin>/` - coin-specific adapters (address/transaction); own DTOs.
-  - `src/adapter/coins/coin-adapter.contracts.ts` - adapter contracts (address/transaction).
+- `src/app.module.ts` - root Nest module; wires `CoinsModule`, `CommonModule`.
+- `src/common/wallet-core/` - shared wallet-core adapter:
+  - `src/common/wallet-core/wallet-core.adapter.ts` - loads WASM via `initWasm()` and exposes `WalletCore` API.
+  - `src/common/wallet-core/wallet-core.module.ts` - exports `WalletCoreAdapter`.
+- `src/common/mnemonic/adapter/` - mnemonic adapter and adapter DTOs.
 - `src/coins/` - API layer per coin:
   - `src/coins/<coin>/` - controllers, services, DTOs, module for each coin.
-  - `src/coins/contracts/coin-service.contracts.ts` - service contracts used by coin services.
-  - `src/coins/coin.config.ts` - mapping from `Coin` enum to wallet-core coin type + derivation.
-  - `src/coins/enum/coin.enum.ts` - supported coin identifiers.
+  - `src/coins/<coin>/adapter/` - coin-specific adapters and adapter DTOs.
+  - `src/coins/<coin>/*-wallet-core.config.ts` - per-coin wallet-core type/purpose/derivation config.
   - `src/coins/coins.module.ts` - aggregates coin modules.
-- `src/common/` - shared modules (mnemonic), errors, and cross-cutting infrastructure.
+- `src/common/` - shared modules (mnemonic), errors, interfaces, and cross-cutting infrastructure.
 - `test/` - e2e tests (`test/*.e2e-spec.ts`).
 - `docs/` - agent-facing documentation (this file, COINS.md, WORKFLOW.md).
 
@@ -41,9 +40,9 @@
 - If Context7 does not cover what you need, consult other sources (prefer official docs and primary references).
 
 ## Where to look first (common tasks)
-- Add a new coin: `docs/COINS.md` and existing modules in `src/coins/` + `src/adapter/coins/`.
+- Add a new coin: `docs/COINS.md` and existing modules in `src/coins/` + `src/coins/<coin>/adapter/`.
 - Add an endpoint: start at `src/coins/<coin>/*.controller.ts` and related services/DTOs.
-- Update coin derivation/SLIP44 config: `src/coins/coin.config.ts`.
+- Update coin derivation/SLIP44 config: `src/coins/<coin>/*-wallet-core.config.ts`.
 - Error formatting: `src/common/errors/api-exception.filter.ts`.
 - Swagger config: `src/main.ts` and per-controller `@Api*` decorators.
 - Tests:
@@ -52,8 +51,8 @@
 
 ## Glossary
 - Adapter: Wrapper around wallet-core WASM that exposes coin operations to services.
-- Coin: A supported chain (see `src/coins/enum/coin.enum.ts`).
-- Coin config: Mapping from coin enum to wallet-core `CoinType`, `Purpose`, and `Derivation`.
+- Coin: A supported chain represented by a module under `src/coins/<coin>/`.
+- Coin config: Per-coin wallet-core mapping in `src/coins/<coin>/*-wallet-core.config.ts`.
 - DTO: Request/response contract using `class-validator` and Swagger decorators.
 - Derivation path: HD wallet path components (purpose, coin, account, change, index).
 - Wallet-core: `@trustwallet/wallet-core` WASM library providing signing/derivation primitives.

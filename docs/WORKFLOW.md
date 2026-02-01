@@ -57,11 +57,11 @@ Commands (all should include `--json`):
 ```
 bd create "Add LTC support" --description="Context: add LTC endpoints and adapters. Acceptance: endpoints + tests + docs. Plan: split into subtasks. Dependencies: none" -t epic -p 1 --json
 
-bd create "Add LTC coin config" --description="Context: introduce LTC in enum/config. Acceptance: enum + config entry. Plan: update coin enum + coin.config. Dependencies: none" -t task -p 1 --json
+bd create "Add LTC wallet-core config" --description="Context: add per-coin wallet-core config. Acceptance: ltc-wallet-core.config.ts with wallet-core keys. Plan: add config + resolver. Dependencies: none" -t task -p 1 --json
 
-bd create "Implement LTC adapters" --description="Context: wallet-core adapter layer. Acceptance: address + transaction adapters with DTOs. Plan: create adapter files + DTOs + AdapterModule wiring. Dependencies: bd-<config-id>" -t task -p 1 --json
+bd create "Implement LTC adapters" --description="Context: wallet-core adapter layer. Acceptance: address + transaction adapters with Input/Output DTOs under src/coins/ltc/adapter. Plan: create adapter files + DTOs + coin module providers. Dependencies: bd-<config-id>" -t task -p 1 --json
 
-bd create "Implement LTC controllers/services" --description="Context: API layer. Acceptance: controllers/services + DTOs + CoinsModule wiring. Plan: create module/controllers/services + DTOs. Dependencies: bd-<config-id>, bd-<adapter-id>" -t task -p 1 --json
+bd create "Implement LTC module/controllers/services" --description="Context: API layer. Acceptance: controllers/services + DTOs + CoinsModule registration. Plan: create module/controllers/services + DTOs and add to coins.module.ts. Dependencies: bd-<config-id>, bd-<adapter-id>" -t task -p 1 --json
 
 bd create "Add LTC tests" --description="Context: endpoint coverage. Acceptance: unit/integration + e2e tests. Plan: add specs in src + test/*.e2e-spec.ts. Dependencies: bd-<api-id>" -t task -p 1 --json
 ```

@@ -1,14 +1,13 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {TronAddressGenerateAdapterRequest} from '../../../adapter/coins/tron/dto/tron-address-generate.dto';
-import {TronAddressGenerateAdapterResponse} from '../../../adapter/coins/tron/dto/tron-address-generate-response.dto';
-import {TronAddressValidateAdapterRequest} from '../../../adapter/coins/tron/dto/tron-address-validate.dto';
-import {TronAddressValidateAdapterResponse} from '../../../adapter/coins/tron/dto/tron-address-validate-response.dto';
-import {TronAddressAdapter} from '../../../adapter/coins/tron/tron-address.adapter';
-import {CoinAddressService} from '../../contracts/coin-address-service.interface';
-import {GenerateTronAddressRequestDto} from '../dto/request/generate-tron-address.request.dto';
-import {ValidateTronAddressRequestDto} from '../dto/request/validate-tron-address.request.dto';
-import {GenerateTronAddressResponseDto} from '../dto/response/generate-tron-address.response.dto';
-import {ValidateTronAddressResponseDto} from '../dto/response/validate-tron-address.response.dto';
+import { Injectable, Logger } from '@nestjs/common';
+import { TronAddressGenerateAdapterInput } from '../adapter/dto/tron-address-generate-input.dto';
+import { TronAddressValidateAdapterInput } from '../adapter/dto/tron-address-validate-input.dto';
+import { TronAddressValidateAdapterOutput } from '../adapter/dto/tron-address-validate-output.dto';
+import { TronAddressAdapter } from '../adapter/tron-address.adapter';
+import { CoinAddressService } from '../../../common/interfaces/coin-address-service.interface';
+import { GenerateTronAddressRequestDto } from '../dto/request/generate-tron-address.request.dto';
+import { ValidateTronAddressRequestDto } from '../dto/request/validate-tron-address.request.dto';
+import { GenerateTronAddressResponseDto } from '../dto/response/generate-tron-address.response.dto';
+import { ValidateTronAddressResponseDto } from '../dto/response/validate-tron-address.response.dto';
 
 /**
  * Provides TRON address generation and validation operations.
@@ -36,7 +35,7 @@ export class TronAddressService implements CoinAddressService<
       `Generating TRON address (account=${request.derivation.account}, change=${request.derivation.change}, index=${request.derivation.index})`,
     );
 
-    const adapterRequest: TronAddressGenerateAdapterRequest = {
+    const adapterRequest: TronAddressGenerateAdapterInput = {
       mnemonic: {
         value: request.mnemonic.value,
         passphrase: request.mnemonic.passphrase ?? '',
@@ -60,11 +59,11 @@ export class TronAddressService implements CoinAddressService<
     request: ValidateTronAddressRequestDto,
   ): ValidateTronAddressResponseDto {
     this.logger.log('Validating TRON address');
-    const adapterRequest: TronAddressValidateAdapterRequest = {
+    const adapterRequest: TronAddressValidateAdapterInput = {
       address: request.address,
     };
 
-    const result: TronAddressValidateAdapterResponse =
+    const result: TronAddressValidateAdapterOutput =
       this.tronAddressAdapter.validate(adapterRequest);
 
     return result;

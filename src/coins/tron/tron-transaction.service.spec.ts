@@ -1,18 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
 import { TronTransactionService } from './service/tron-transaction.service';
-import { TronTransactionAdapter } from '../../adapter/coins/tron/tron-transaction.adapter';
+import { TronTransactionAdapter } from './adapter/tron-transaction.adapter';
 
 describe('TRON transaction service', () => {
-  const transferJson = JSON.stringify({
-    raw_data: { contract: [{ type: 'TransferContract' }] },
-  });
-  const smartContractJson = JSON.stringify({
-    raw_data: { contract: [{ type: 'TriggerSmartContract' }] },
-  });
-  const unknownContractJson = JSON.stringify({
-    raw_data: { contract: [{ type: 'VoteWitnessContract' }] },
-  });
-
   const buildResponse = {
     rawJson: '{"transfer":{}}',
   };
@@ -25,44 +14,51 @@ describe('TRON transaction service', () => {
   };
 
   const makeService = () => {
-    const adapter = {
+    const adapter: {
+      buildTransaction: jest.Mock;
+      buildTransfer: jest.Mock;
+      signTransaction: jest.Mock;
+    } = {
       buildTransaction: jest.fn().mockReturnValue(buildResponse),
+      buildTransfer: jest.fn().mockReturnValue(buildResponse),
       signTransaction: jest.fn().mockReturnValue(signResponse),
-    } as unknown as TronTransactionAdapter;
+    };
     return {
       adapter,
-      service: new TronTransactionService(adapter),
+      service: new TronTransactionService(
+        adapter as unknown as TronTransactionAdapter,
+      ),
     };
   };
 
-  it('builds transfer from params using transfer contract', () => {
+  it('builds TRX transaction from params', () => {
     const { adapter, service } = makeService();
-    const result = service.buildTransfer({
+    const result = service.buildTransaction({
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
     });
-
     expect(result).toBe(buildResponse);
     expect(adapter.buildTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
-        transferType: 'trx',
+        ownerAddress: 'TXYZ',
+        toAddress: 'TABC',
+        amount: '1',
       }),
     );
   });
 
-  it('builds TRC10 transaction when transferType is trc10', () => {
+  it('builds TRC10 transfer from params', () => {
     const { adapter, service } = makeService();
-    const result = service.buildTransaction({
+    const result = service.buildTransfer({
       transferType: 'trc10',
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '100',
       assetName: 'TOKEN',
     });
-
     expect(result).toBe(buildResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+    expect(adapter.buildTransfer).toHaveBeenCalledWith(
       expect.objectContaining({
         transferType: 'trc10',
         assetName: 'TOKEN',
@@ -70,9 +66,9 @@ describe('TRON transaction service', () => {
     );
   });
 
-  it('builds TRC20 transaction when transferType is trc20', () => {
+  it('builds TRC20 transfer from params', () => {
     const { adapter, service } = makeService();
-    const result = service.buildTransaction({
+    const result = service.buildTransfer({
       transferType: 'trc20',
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
@@ -81,9 +77,8 @@ describe('TRON transaction service', () => {
       callValue: '0',
       feeLimit: '10000000',
     });
-
     expect(result).toBe(buildResponse);
-    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+    expect(adapter.buildTransfer).toHaveBeenCalledWith(
       expect.objectContaining({
         transferType: 'trc20',
         contractAddress: 'TCONTRACT',
@@ -93,52 +88,20 @@ describe('TRON transaction service', () => {
     );
   });
 
-  it('signs raw transfer when rawJson is a transfer contract', () => {
-    const { adapter, service } = makeService();
-    const result = service.signRawTransfer({
-      rawJson: transferJson,
-      privateKey: '00'.repeat(32),
-    });
-
-    expect(result).toBe(signResponse);
-    expect(adapter.signTransaction).toHaveBeenCalledTimes(1);
-  });
-
   it('signs raw transaction when rawJson is provided', () => {
     const { adapter, service } = makeService();
-    const result = service.signRawTransaction({
-      rawJson: transferJson,
+    const result = service.sign({
+      rawJson: '{"raw_data":{}}',
       privateKey: '00'.repeat(32),
       txId: 'txid',
     });
-
     expect(result).toBe(signResponse);
     expect(adapter.signTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
-        rawJson: transferJson,
+        rawJson: '{"raw_data":{}}',
         privateKey: '00'.repeat(32),
         txId: 'txid',
       }),
     );
-  });
-
-  it('rejects raw transfer signing for smart contract rawJson', () => {
-    const { service } = makeService();
-    expect(() =>
-      service.signRawTransfer({
-        rawJson: smartContractJson,
-        privateKey: '00'.repeat(32),
-      }),
-    ).toThrow(BadRequestException);
-  });
-
-  it('rejects raw transfer signing for unknown contract type', () => {
-    const { service } = makeService();
-    expect(() =>
-      service.signRawTransfer({
-        rawJson: unknownContractJson,
-        privateKey: '00'.repeat(32),
-      }),
-    ).toThrow(BadRequestException);
   });
 });

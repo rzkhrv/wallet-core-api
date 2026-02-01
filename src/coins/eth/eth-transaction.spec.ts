@@ -1,7 +1,7 @@
 import { TW } from '@trustwallet/wallet-core';
-import { EthTransactionAdapter } from '../../adapter/coins/eth/eth-transaction.adapter';
-import { AdapterError } from '../../adapter/common/adapter-error';
-import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
+import { EthTransactionAdapter } from './adapter/eth-transaction.adapter';
+import { AdapterError } from '../../common/errors/adapter-error';
+import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { EthTransactionService } from './service/eth-transaction.service';
 
 const resolveEthTransferAmount = (
@@ -65,7 +65,7 @@ describe('ETH transaction signing', () => {
       amount: '1000000',
     });
 
-    const result = transactionAdapter.signTransfer({
+    const result = transactionAdapter.signTransaction({
       payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
@@ -112,10 +112,7 @@ describe('ETH transaction signing', () => {
       toAddress: '0x1111111111111111111111111111111111111111',
       amount: '0x10',
     }).payload;
-    const hexAmount: bigint = resolveEthTransferAmount(
-      hexPayload,
-      walletCore,
-    );
+    const hexAmount: bigint = resolveEthTransferAmount(hexPayload, walletCore);
     expect(hexAmount).toBe(16n);
   });
 
@@ -179,7 +176,7 @@ describe('ETH transaction signing', () => {
       amount: '1000000',
     });
 
-    const result = transactionService.signTransfer({
+    const result = transactionService.sign({
       payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
@@ -198,7 +195,7 @@ describe('ETH transaction signing', () => {
       amount: '1000000000000000',
     });
 
-    const result = transactionService.signTransaction({
+    const result = transactionService.sign({
       payload: buildResult.payload,
       privateKey:
         '4c0883a69102937d6231471b5dbb6204fe512961708279004a0b7b6f1b7f5f30',
@@ -219,7 +216,7 @@ describe('ETH transaction signing', () => {
     });
 
     expect(() =>
-      transactionAdapter.signTransfer({
+      transactionAdapter.signTransaction({
         payload: buildResult.payload,
         privateKey: 'invalid',
       }),

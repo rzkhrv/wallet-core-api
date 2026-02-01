@@ -1,21 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EthTransactionAdapter } from '../../../adapter/coins/eth/eth-transaction.adapter';
-import { EthErc20TransferBuildAdapterRequest } from '../../../adapter/coins/eth/dto/eth-erc20-transfer.dto';
-import { EthErc20TransferBuildAdapterResponse } from '../../../adapter/coins/eth/dto/eth-erc20-transfer-response.dto';
-import { EthErc20TransferSignAdapterRequest } from '../../../adapter/coins/eth/dto/eth-erc20-transfer-sign.dto';
-import { EthErc20TransferSignAdapterResponse } from '../../../adapter/coins/eth/dto/eth-erc20-transfer-sign-response.dto';
-import { EthTransactionBuildAdapterRequest } from '../../../adapter/coins/eth/dto/eth-transaction-build.dto';
-import { EthTransactionBuildAdapterResponse } from '../../../adapter/coins/eth/dto/eth-transaction-build-response.dto';
-import { EthTransactionSignAdapterRequest } from '../../../adapter/coins/eth/dto/eth-transaction-sign.dto';
-import { EthTransactionSignAdapterResponse } from '../../../adapter/coins/eth/dto/eth-transaction-sign-response.dto';
-import { CoinTransactionService } from '../../contracts/coin-transaction-service.interface';
+import { EthTransactionAdapter } from '../adapter/eth-transaction.adapter';
+import { EthErc20TransferBuildAdapterInput } from '../adapter/dto/eth-erc20-transfer-build-input.dto';
+import { EthErc20TransferBuildAdapterOutput } from '../adapter/dto/eth-erc20-transfer-build-output.dto';
+import { EthTransactionBuildAdapterInput } from '../adapter/dto/eth-transaction-build-input.dto';
+import { EthTransactionBuildAdapterOutput } from '../adapter/dto/eth-transaction-build-output.dto';
+import { EthTransactionSignAdapterInput } from '../adapter/dto/eth-transaction-sign-input.dto';
+import { EthTransactionSignAdapterOutput } from '../adapter/dto/eth-transaction-sign-output.dto';
+import { CoinTransactionService } from '../../../common/interfaces/coin-transaction-service.interface';
 import { BuildEthErc20TransferRequestDto } from '../dto/request/build-eth-erc20-transfer.request.dto';
 import { BuildEthTransactionRequestDto } from '../dto/request/build-eth-transaction.request.dto';
-import { SignEthErc20TransferRequestDto } from '../dto/request/sign-eth-erc20-transfer.request.dto';
 import { SignEthTransactionRequestDto } from '../dto/request/sign-eth-transaction.request.dto';
 import { BuildEthErc20TransferResponseDto } from '../dto/response/build-eth-erc20-transfer.response.dto';
 import { BuildEthTransactionResponseDto } from '../dto/response/build-eth-transaction.response.dto';
-import { SignEthErc20TransferResponseDto } from '../dto/response/sign-eth-erc20-transfer.response.dto';
 import { SignEthTransactionResponseDto } from '../dto/response/sign-eth-transaction.response.dto';
 
 /**
@@ -41,7 +37,7 @@ export class EthTransactionService implements CoinTransactionService<
     request: BuildEthTransactionRequestDto,
   ): BuildEthTransactionResponseDto {
     this.logger.log('Building ETH transaction');
-    const adapterRequest: EthTransactionBuildAdapterRequest = {
+    const adapterRequest: EthTransactionBuildAdapterInput = {
       chainId: request.chainId,
       nonce: request.nonce,
       gasPrice: request.gasPrice,
@@ -50,7 +46,7 @@ export class EthTransactionService implements CoinTransactionService<
       amount: request.amount,
     };
 
-    const result: EthTransactionBuildAdapterResponse =
+    const result: EthTransactionBuildAdapterOutput =
       this.ethTransactionAdapter.buildTransaction(adapterRequest);
 
     return result;
@@ -65,7 +61,7 @@ export class EthTransactionService implements CoinTransactionService<
     request: BuildEthErc20TransferRequestDto,
   ): BuildEthErc20TransferResponseDto {
     this.logger.log('Building ETH ERC20 transfer');
-    const adapterRequest: EthErc20TransferBuildAdapterRequest = {
+    const adapterRequest: EthErc20TransferBuildAdapterInput = {
       chainId: request.chainId,
       nonce: request.nonce,
       gasPrice: request.gasPrice,
@@ -75,7 +71,7 @@ export class EthTransactionService implements CoinTransactionService<
       amount: request.amount,
     };
 
-    const result: EthErc20TransferBuildAdapterResponse =
+    const result: EthErc20TransferBuildAdapterOutput =
       this.ethTransactionAdapter.buildTransfer(adapterRequest);
 
     return result;
@@ -86,37 +82,15 @@ export class EthTransactionService implements CoinTransactionService<
    * @param request Request payload.
    * @returns Signed transaction response.
    */
-  signTransaction(
-    request: SignEthTransactionRequestDto,
-  ): SignEthTransactionResponseDto {
+  sign(request: SignEthTransactionRequestDto): SignEthTransactionResponseDto {
     this.logger.log('Signing ETH transaction');
-    const adapterRequest: EthTransactionSignAdapterRequest = {
+    const adapterRequest: EthTransactionSignAdapterInput = {
       payload: request.payload,
       privateKey: request.privateKey,
     };
 
-    const result: EthTransactionSignAdapterResponse =
+    const result: EthTransactionSignAdapterOutput =
       this.ethTransactionAdapter.signTransaction(adapterRequest);
-
-    return result;
-  }
-
-  /**
-   * Signs an ERC20 transfer payload.
-   * @param request Request payload.
-   * @returns Signed transfer response.
-   */
-  signTransfer(
-    request: SignEthErc20TransferRequestDto,
-  ): SignEthErc20TransferResponseDto {
-    this.logger.log('Signing ETH ERC20 transfer');
-    const adapterRequest: EthErc20TransferSignAdapterRequest = {
-      payload: request.payload,
-      privateKey: request.privateKey,
-    };
-
-    const result: EthErc20TransferSignAdapterResponse =
-      this.ethTransactionAdapter.signTransfer(adapterRequest);
 
     return result;
   }

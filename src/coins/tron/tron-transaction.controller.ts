@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BuildTronTransactionRequestDto } from './dto/request/build-tron-transaction.request.dto';
+import { BuildTronTransferRequestDto } from './dto/request/build-tron-transfer.request.dto';
 import { SignTronRawTransactionRequestDto } from './dto/request/sign-tron-raw-transaction.request.dto';
 import { BuildTronTransactionResponseDto } from './dto/response/build-tron-transaction.response.dto';
 import { SignTronTransactionResponseDto } from './dto/response/sign-tron-transaction.response.dto';
@@ -21,28 +22,30 @@ export class TronTransactionController {
   ) {}
 
   /**
-   * Builds a TRON transfer from request parameters.
+   * Builds a TRON token transfer from request parameters.
    * @param body Request payload.
    * @returns Unsigned transaction payload.
    */
   @Post('build-transfer')
-  @ApiOperation({ summary: 'Build TRON transfer from params (unsigned)' })
-  @ApiBody({ type: BuildTronTransactionRequestDto })
+  @ApiOperation({ summary: 'Build TRON token transfer from params (unsigned)' })
+  @ApiBody({ type: BuildTronTransferRequestDto })
   @ApiResponse({ status: 201, type: BuildTronTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   buildTransfer(
-    @Body() body: BuildTronTransactionRequestDto,
+    @Body() body: BuildTronTransferRequestDto,
   ): BuildTronTransactionResponseDto {
     return this.tronTransactionService.buildTransfer(body);
   }
 
   /**
-   * Builds a TRON transaction from request parameters.
+   * Builds a TRON TRX transaction from request parameters.
    * @param body Request payload.
    * @returns Unsigned transaction payload.
    */
   @Post('build-transaction')
-  @ApiOperation({ summary: 'Build TRON transaction from params (unsigned)' })
+  @ApiOperation({
+    summary: 'Build TRON TRX transaction from params (unsigned)',
+  })
   @ApiBody({ type: BuildTronTransactionRequestDto })
   @ApiResponse({ status: 201, type: BuildTronTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -57,31 +60,15 @@ export class TronTransactionController {
    * @param body Request payload.
    * @returns Signed transaction response.
    */
-  @Post('sign-transfer')
-  @ApiOperation({ summary: 'Sign TRON transfer from rawJson' })
+  @Post('sign')
+  @ApiOperation({ summary: 'Sign TRON transaction or transfer from rawJson' })
   @ApiBody({ type: SignTronRawTransactionRequestDto })
   @ApiResponse({ status: 201, type: SignTronTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  signRawTransfer(
+  sign(
     @Body() body: SignTronRawTransactionRequestDto,
   ): SignTronTransactionResponseDto {
-    return this.tronTransactionService.signRawTransfer(body);
-  }
-
-  /**
-   * Signs a TRON transaction from raw JSON.
-   * @param body Request payload.
-   * @returns Signed transaction response.
-   */
-  @Post('sign-transaction')
-  @ApiOperation({ summary: 'Sign TRON transaction from rawJson' })
-  @ApiBody({ type: SignTronRawTransactionRequestDto })
-  @ApiResponse({ status: 201, type: SignTronTransactionResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  signRawTransaction(
-    @Body() body: SignTronRawTransactionRequestDto,
-  ): SignTronTransactionResponseDto {
-    return this.tronTransactionService.signRawTransaction(body);
+    return this.tronTransactionService.sign(body);
   }
 
   /**
