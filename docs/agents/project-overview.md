@@ -16,6 +16,8 @@ Understand what the service does, where the main entry points live, and how requ
 - TRON transactions: `build-transaction` for TRX, `build-transfer` for TRC10/TRC20.
 - Build transaction endpoints return `{ payload, transaction }` where `transaction` is derived from built artifacts (ETH/BTC decode signing input, TRON TRC20 decodes `triggerSmartContract.data`).
 - TRON payloads are hex-encoded UTF-8 raw JSON; TRON sign expects the hex payload and decodes to rawJson before wallet-core signing.
+- BTC build supports multiple outputs via `extraOutputs`; request supplies outputs list with exactly one change output, which is returned in transaction outputs with plan-derived change amount.
+- BTC build expects UTXO txids in standard display order (big-endian hex), reverses bytes for wallet-core, and uses fixed hashType `1` (SIGHASH_ALL) surfaced only in build responses.
 - Documentation lookup: always check MCP Context7 first for NestJS, TypeScript, wallet-core, and crypto references.
 
 ## Steps

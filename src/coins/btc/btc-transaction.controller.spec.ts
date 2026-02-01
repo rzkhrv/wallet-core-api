@@ -12,9 +12,10 @@ describe('BtcTransactionController', () => {
   const buildResponse: BuildBtcTransactionResponseDto = {
     payload: 'deadbeef',
     transaction: {
-      toAddress: 'bc1qtest',
-      changeAddress: 'bc1qtest',
-      amount: '1000',
+      outputs: [
+        { address: 'bc1qrecipient', amount: '1000', isChange: false },
+        { address: 'bc1qchange', amount: '990', isChange: true },
+      ],
       byteFee: '1',
       utxos: [
         {
@@ -22,11 +23,9 @@ describe('BtcTransactionController', () => {
           vout: 0,
           amount: '2000',
           scriptPubKey: 'ABQ=',
-          reverseTxId: false,
         },
       ],
       hashType: 1,
-      useMaxAmount: false,
       plan: {
         amount: '1000',
         availableAmount: '2000',
@@ -59,9 +58,10 @@ describe('BtcTransactionController', () => {
 
   it('delegates build transaction', () => {
     const body: BuildBtcTransactionRequestDto = {
-      toAddress: 'bc1qtest',
-      changeAddress: 'bc1qtest',
-      amount: '1000',
+      outputs: [
+        { address: 'bc1qrecipient', amount: '1000' },
+        { address: 'bc1qchange', isChange: true },
+      ],
       byteFee: '1',
       utxos: [
         {
@@ -69,7 +69,6 @@ describe('BtcTransactionController', () => {
           vout: 0,
           amount: '2000',
           scriptPubKey: '76a914',
-          reverseTxId: false,
         },
       ],
     };

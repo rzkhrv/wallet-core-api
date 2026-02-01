@@ -32,19 +32,14 @@ export class BtcTransactionService implements CoinTransactionService<
   ): BuildBtcTransactionResponseDto {
     this.logger.log('Building BTC transaction');
     const adapterRequest: BtcBuildTransactionAdapterInput = {
-      toAddress: request.toAddress,
-      changeAddress: request.changeAddress,
-      amount: request.amount,
+      outputs: request.outputs,
       byteFee: request.byteFee,
       utxos: request.utxos.map((utxo) => ({
         txid: utxo.txid,
         vout: utxo.vout,
         amount: utxo.amount,
         scriptPubKey: utxo.scriptPubKey,
-        reverseTxId: utxo.reverseTxId,
       })),
-      hashType: request.hashType,
-      useMaxAmount: request.useMaxAmount,
     };
 
     const result: BtcBuildTransactionAdapterOutput =

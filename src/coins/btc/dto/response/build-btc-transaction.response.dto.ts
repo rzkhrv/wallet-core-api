@@ -22,32 +22,34 @@ export class BtcBuildTransactionUtxoResponseDto {
     description: 'UTXO scriptPubKey (base64)',
   })
   scriptPubKey: string;
+}
+
+export class BtcBuildTransactionOutputResponseDto {
+  @ApiProperty({
+    example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h',
+    description: 'Output BTC address',
+  })
+  address: string;
 
   @ApiProperty({
-    example: true,
-    description: 'Reverse txid byte order when required',
+    example: '10000',
+    description: 'Output amount in satoshis',
   })
-  reverseTxId: boolean;
+  amount: string;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indicates if this output is the change output',
+  })
+  isChange: boolean;
 }
 
 export class BtcBuildTransactionIntentResponseDto {
   @ApiProperty({
-    example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h',
-    description: 'Recipient BTC address',
+    type: [BtcBuildTransactionOutputResponseDto],
+    description: 'Resolved outputs, including change',
   })
-  toAddress: string;
-
-  @ApiProperty({
-    example: 'bc1q2l3m4n5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e',
-    description: 'Change BTC address',
-  })
-  changeAddress: string;
-
-  @ApiProperty({
-    example: '10000',
-    description: 'Amount to send in satoshis',
-  })
-  amount: string;
+  outputs: BtcBuildTransactionOutputResponseDto[];
 
   @ApiProperty({
     example: '10',
@@ -60,12 +62,6 @@ export class BtcBuildTransactionIntentResponseDto {
 
   @ApiProperty({ example: 1, description: 'Resolved SIGHASH type' })
   hashType: number;
-
-  @ApiProperty({
-    example: false,
-    description: 'Spend maximum available amount',
-  })
-  useMaxAmount: boolean;
 
   @ApiProperty({ type: BtcTransactionPlanResponseDto })
   plan: BtcTransactionPlanResponseDto;

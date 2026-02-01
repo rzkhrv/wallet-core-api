@@ -1,46 +1,47 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsBtcAddress,
-  IsBoolean,
-  IsInt,
   IsNotEmpty,
   IsNumberString,
-  IsOptional,
   IsString,
+  Validate,
   ValidateNested,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
 import { BtcUtxoRequestDto } from './btc-utxo.request.dto';
+import { BtcOutputRequestDto } from './btc-output.request.dto';
+
+@ValidatorConstraint({ name: 'BtcOutputsValidator', async: false })
+class BtcOutputsValidator implements ValidatorConstraintInterface {
+  validate(outputs: BtcOutputRequestDto[] | undefined): boolean {
+    if (!outputs || outputs.length === 0) {
+      return false;
+    }
+    const changeCount = outputs.filter((output) => output.isChange).length;
+    const recipientCount = outputs.filter((output) => !output.isChange).length;
+    return changeCount === 1 && recipientCount > 0;
+  }
+
+  defaultMessage(): string {
+    return 'BTC outputs must include exactly one change output and at least one recipient';
+  }
+}
 
 export class BuildBtcTransactionRequestDto {
   @ApiProperty({
-    example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h',
-    description: 'Recipient BTC address',
+    type: [BtcOutputRequestDto],
+    description:
+      'List of transaction outputs, including exactly one change output (isChange=true)',
   })
-  @IsBtcAddress()
-  @IsString()
-  @IsNotEmpty()
-  toAddress: string;
-
-  @ApiProperty({
-    example: 'bc1q2l3m4n5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e',
-    description: 'Change BTC address',
-  })
-  @IsBtcAddress()
-  @IsString()
-  @IsNotEmpty()
-  changeAddress: string;
-
-  @ApiProperty({
-    example: '10000',
-    description: 'Amount to send in satoshis',
-  })
-  @IsNumberString({ no_symbols: true })
-  @IsString()
-  @IsNotEmpty()
-  amount: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => BtcOutputRequestDto)
+  @Validate(BtcOutputsValidator)
+  outputs: BtcOutputRequestDto[];
 
   @ApiProperty({ example: '10', description: 'Fee per byte in satoshis' })
   @IsNumberString({ no_symbols: true })
@@ -57,20 +58,4 @@ export class BuildBtcTransactionRequestDto {
   @ValidateNested({ each: true })
   @Type(() => BtcUtxoRequestDto)
   utxos: BtcUtxoRequestDto[];
-
-  @ApiPropertyOptional({
-    example: 1,
-    description: 'Optional SIGHASH type',
-  })
-  @IsOptional()
-  @IsInt()
-  hashType?: number;
-
-  @ApiPropertyOptional({
-    example: false,
-    description: 'Spend maximum available amount',
-  })
-  @IsOptional()
-  @IsBoolean()
-  useMaxAmount?: boolean;
 }

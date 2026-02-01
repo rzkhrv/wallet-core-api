@@ -9,6 +9,7 @@ import { BtcBuildTransactionAdapterInput } from './dto/btc-transaction-build-inp
 import {
   BtcBuildTransactionAdapterOutput,
   BtcBuildTransactionIntent,
+  BtcBuildTransactionOutputIntent,
   BtcBuildTransactionUtxoIntent,
 } from './dto/btc-transaction-build-output.dto';
 import { BtcSignTransactionAdapterInput } from './dto/btc-transaction-sign-input.dto';
@@ -131,11 +132,11 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     coinType: number,
   ): TW.Bitcoin.Proto.SigningInput {
     const core = this.walletCore.getCore();
+    const { recipients, change } = this.resolveOutputs(input.outputs);
+    const [primaryRecipient, ...extraRecipients] = recipients;
     const utxos = input.utxos.map((utxo) => {
       const hashBytes = core.HexCoding.decode(utxo.txid);
-      if (utxo.reverseTxId ?? true) {
-        hashBytes.reverse();
-      }
+      hashBytes.reverse();
 
       return TW.Bitcoin.Proto.UnspentTransaction.create({
         outPoint: {
@@ -148,13 +149,18 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     });
 
     return TW.Bitcoin.Proto.SigningInput.create({
-      hashType: input.hashType ?? 1,
-      amount: Long.fromString(input.amount),
+      hashType: 1,
+      amount: Long.fromString(primaryRecipient.amount),
       byteFee: Long.fromString(input.byteFee),
-      toAddress: input.toAddress,
-      changeAddress: input.changeAddress,
+      toAddress: primaryRecipient.address,
+      changeAddress: change.address,
       utxo: utxos,
-      useMaxAmount: input.useMaxAmount ?? false,
+      extraOutputs: extraRecipients.map((output) =>
+        TW.Bitcoin.Proto.OutputAddress.create({
+          toAddress: output.address,
+          amount: Long.fromString(output.amount),
+        }),
+      ),
       coinType,
     });
   }
@@ -242,17 +248,12 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     plan: TW.Bitcoin.Proto.TransactionPlan,
     input: BtcBuildTransactionAdapterInput,
   ): BtcBuildTransactionIntent {
+    const outputs = this.resolveOutputIntent(signingInput, plan);
     return {
-      toAddress: this.requireString(signingInput.toAddress, 'toAddress'),
-      changeAddress: this.requireString(
-        signingInput.changeAddress,
-        'changeAddress',
-      ),
-      amount: this.toLongString(signingInput.amount),
+      outputs,
       byteFee: this.toLongString(signingInput.byteFee),
       utxos: this.resolveUtxos(signingInput, input),
       hashType: signingInput.hashType ?? 1,
-      useMaxAmount: signingInput.useMaxAmount ?? false,
       plan: this.toPlanResponse(plan),
     };
   }
@@ -270,7 +271,7 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
       );
     }
 
-    return utxos.map((utxo, index) => {
+    return utxos.map((utxo) => {
       const outPoint = utxo.outPoint;
       if (!outPoint?.hash) {
         throw new AdapterError(
@@ -279,11 +280,8 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
         );
       }
 
-      const reverseTxId = input.utxos[index]?.reverseTxId ?? true;
       const hashBytes = new Uint8Array(outPoint.hash);
-      const displayHash = reverseTxId
-        ? Uint8Array.from(hashBytes).reverse()
-        : hashBytes;
+      const displayHash = Uint8Array.from(hashBytes).reverse();
       const script = utxo.script;
       if (!script) {
         throw new AdapterError(
@@ -297,9 +295,77 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
         vout: outPoint.index ?? 0,
         amount: this.toLongString(utxo.amount),
         scriptPubKey: Buffer.from(script).toString('base64'),
-        reverseTxId,
       };
     });
+  }
+
+  private resolveOutputs(outputs: BtcBuildTransactionAdapterInput['outputs']): {
+    recipients: Array<{ address: string; amount: string }>;
+    change: { address: string };
+  } {
+    if (!outputs || outputs.length === 0) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INVALID',
+        'BTC outputs are required',
+      );
+    }
+    const changeOutputs = outputs.filter((output) => output.isChange);
+    if (changeOutputs.length !== 1) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INVALID',
+        'BTC transaction requires exactly one change output',
+      );
+    }
+    const recipients = outputs.filter((output) => !output.isChange);
+    if (recipients.length === 0) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INVALID',
+        'BTC transaction requires at least one recipient output',
+      );
+    }
+    return {
+      recipients: recipients.map((output) => ({
+        address: this.requireString(output.address, 'output.address'),
+        amount: this.requireAmount(output.amount),
+      })),
+      change: {
+        address: this.requireString(
+          changeOutputs[0]?.address,
+          'change.address',
+        ),
+      },
+    };
+  }
+
+  private resolveOutputIntent(
+    signingInput: TW.Bitcoin.Proto.SigningInput,
+    plan: TW.Bitcoin.Proto.TransactionPlan,
+  ): BtcBuildTransactionOutputIntent[] {
+    const primaryAmount = this.toLongString(signingInput.amount);
+    const recipients: BtcBuildTransactionOutputIntent[] = [
+      {
+        address: this.requireString(signingInput.toAddress, 'toAddress'),
+        amount: primaryAmount,
+        isChange: false,
+      },
+      ...(signingInput.extraOutputs ?? []).map((output) => ({
+        address: this.requireString(output.toAddress, 'extraOutputs.toAddress'),
+        amount: this.toLongString(output.amount),
+        isChange: false,
+      })),
+    ];
+
+    return [
+      ...recipients,
+      {
+        address: this.requireString(
+          signingInput.changeAddress,
+          'changeAddress',
+        ),
+        amount: this.toLongString(plan.change),
+        isChange: true,
+      },
+    ];
   }
 
   private toLongString(value: Long | number | null | undefined): string {
@@ -312,12 +378,25 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     return value.toString();
   }
 
-  private requireString(value: string | undefined, field: string): string {
+  private requireString(
+    value: string | null | undefined,
+    field: string,
+  ): string {
     if (!value) {
       throw new AdapterError(
         'BTC_TRANSACTION_BUILD_INCOMPLETE',
         `BTC signing input missing ${field}`,
         { field },
+      );
+    }
+    return value;
+  }
+
+  private requireAmount(value: string | undefined): string {
+    if (!value) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INVALID',
+        'BTC recipient output amount is required',
       );
     }
     return value;

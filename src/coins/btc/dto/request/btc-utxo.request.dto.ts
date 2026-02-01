@@ -1,11 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsHash,
   IsInt,
   IsNotEmpty,
   IsNumberString,
-  IsOptional,
   IsString,
   Matches,
   Min,
@@ -43,12 +41,4 @@ export class BtcUtxoRequestDto {
   @IsString()
   @IsNotEmpty()
   scriptPubKey: string;
-
-  @ApiPropertyOptional({
-    example: true,
-    description: 'Reverse txid byte order when required',
-  })
-  @IsOptional()
-  @IsBoolean()
-  reverseTxId?: boolean;
 }

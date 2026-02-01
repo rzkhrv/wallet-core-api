@@ -6,17 +6,19 @@ export interface BtcBuildTransactionUtxoIntent {
   vout: number;
   amount: string;
   scriptPubKey: string;
-  reverseTxId: boolean;
+}
+
+export interface BtcBuildTransactionOutputIntent {
+  address: string;
+  amount: string;
+  isChange: boolean;
 }
 
 export interface BtcBuildTransactionIntent {
-  toAddress: string;
-  changeAddress: string;
-  amount: string;
+  outputs: BtcBuildTransactionOutputIntent[];
   byteFee: string;
   utxos: BtcBuildTransactionUtxoIntent[];
   hashType: number;
-  useMaxAmount: boolean;
   plan: {
     amount: string;
     availableAmount: string;

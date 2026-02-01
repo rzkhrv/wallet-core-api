@@ -46,7 +46,10 @@ type TronSignResponse = { txId: string; signature: string };
 
 type BtcBuildResponse = {
   payload: string;
-  transaction: { plan?: { amount?: string } };
+  transaction: {
+    outputs?: { address?: string; amount?: string; isChange?: boolean }[];
+    plan?: { amount?: string; change?: string };
+  };
 };
 type BtcSignResponse = {
   rawTx: string;
@@ -333,9 +336,10 @@ describe('Wallet Core API (e2e)', () => {
     const buildResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/btc/build-transaction')
       .send({
-        toAddress: btcAddress,
-        changeAddress: btcAddress,
-        amount: '1000',
+        outputs: [
+          { address: btcAddress, amount: '1000' },
+          { address: btcAddress, isChange: true },
+        ],
         byteFee: '1',
         utxos: [
           {
@@ -343,7 +347,6 @@ describe('Wallet Core API (e2e)', () => {
             vout: 0,
             amount: '100000',
             scriptPubKey,
-            reverseTxId: false,
           },
         ],
       })
@@ -352,6 +355,12 @@ describe('Wallet Core API (e2e)', () => {
     const btcBuildBody = buildResponse.body as BtcBuildResponse;
     expect(btcBuildBody.payload).toBeDefined();
     expect(btcBuildBody.transaction.plan?.amount).toBe('1000');
+    expect(btcBuildBody.transaction.outputs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ address: btcAddress, isChange: false }),
+        expect.objectContaining({ address: btcAddress, isChange: true }),
+      ]),
+    );
 
     const signResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/btc/sign')

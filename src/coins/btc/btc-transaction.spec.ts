@@ -42,9 +42,10 @@ describe('BTC transaction signing', () => {
     script.delete();
 
     const buildResult = transactionAdapter.buildTransaction({
-      toAddress: recipientAddress.address,
-      changeAddress: utxoAddress.address,
-      amount: '1000',
+      outputs: [
+        { address: recipientAddress.address, amount: '1000' },
+        { address: utxoAddress.address, isChange: true },
+      ],
       byteFee: '1',
       utxos: [
         {
@@ -52,13 +53,26 @@ describe('BTC transaction signing', () => {
           vout: 0,
           amount: '100000',
           scriptPubKey,
-          reverseTxId: false,
         },
       ],
     });
 
     expect(buildResult.payload).toBeDefined();
     expect(buildResult.transaction.plan.amount).toBe('1000');
+    expect(buildResult.transaction.outputs).toEqual(
+      expect.arrayContaining([
+        {
+          address: recipientAddress.address,
+          amount: '1000',
+          isChange: false,
+        },
+        {
+          address: utxoAddress.address,
+          amount: buildResult.transaction.plan.change,
+          isChange: true,
+        },
+      ]),
+    );
 
     const signResult = transactionAdapter.signTransaction({
       payload: buildResult.payload,

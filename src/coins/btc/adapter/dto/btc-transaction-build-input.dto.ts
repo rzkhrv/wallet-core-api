@@ -6,18 +6,19 @@ interface BtcUtxoInput {
   vout: number;
   amount: string;
   scriptPubKey: string;
-  reverseTxId?: boolean;
+}
+
+interface BtcOutputInput {
+  address: string;
+  amount?: string;
+  isChange?: boolean;
 }
 
 /**
  * Adapter request payload for BTC transaction building.
  */
 export interface BtcBuildTransactionAdapterInput {
-  toAddress: string;
-  changeAddress: string;
-  amount: string;
+  outputs: BtcOutputInput[];
   byteFee: string;
   utxos: BtcUtxoInput[];
-  hashType?: number;
-  useMaxAmount?: boolean;
 }

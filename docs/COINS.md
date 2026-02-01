@@ -68,6 +68,14 @@ src/
 - `sign` signs payloads from either build endpoint.
 - Keep route names consistent with existing coins and document any deviations.
 
+## BTC build specifics
+- BTC `build-transaction` uses `outputs` (array):
+  - Each output has `address`, `amount` (required for recipients), and optional `isChange`.
+  - Exactly one output must have `isChange: true`, and there must be at least one recipient output.
+- The response `transaction.outputs` always includes the change output with the plan-derived change amount.
+- UTXO `txid` values are expected in standard display order (big-endian hex); the adapter reverses bytes internally for wallet-core.
+- BTC build uses a fixed SIGHASH type (`1`, SIGHASH_ALL); it is surfaced in the build `transaction` for inspection but not accepted in requests.
+
 ## Step-by-step: add a new coin
 1. Create BD tasks (see `docs/WORKFLOW.md`). Do not expand scope without new tasks.
 2. Add wallet-core configuration:
