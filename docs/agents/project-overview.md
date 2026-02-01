@@ -12,6 +12,8 @@ Understand what the service does, where the main entry points live, and how requ
 - Request flow: Controller → Service → Adapter → wallet-core.
 - Errors normalized by `ApiExceptionFilter` into `{ error: { code, message, details } }`.
 - Swagger UI served at `/api`.
+- POST endpoints return HTTP 201; Swagger responses use 201 to match runtime defaults.
+- TRON transactions: build endpoints cover TRX/TRC10/TRC20 (TriggerSmartContract) transfers.
 
 ## Steps
 1. Read `docs/PROJECT.md` for architecture and conventions.

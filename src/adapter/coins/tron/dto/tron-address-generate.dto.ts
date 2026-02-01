@@ -1,31 +1,24 @@
-export interface TronMnemonicInput {
+/**
+ * Mnemonic input payload for TRON address derivation.
+ */
+interface TronMnemonicInput {
   value: string;
   passphrase?: string;
 }
 
-export interface TronDerivationInput {
+/**
+ * Derivation path input for TRON address generation.
+ */
+interface TronDerivationInput {
   account: number;
   change: number;
   index: number;
 }
 
+/**
+ * Adapter request payload for TRON address generation.
+ */
 export interface TronAddressGenerateAdapterRequest {
   mnemonic: TronMnemonicInput;
   derivation: TronDerivationInput;
-}
-
-export interface TronAddressGenerateAdapterResponse {
-  address: string;
-  keys: {
-    public: string;
-    private: string;
-  };
-  derivation: {
-    path: string;
-    purpose: number;
-    coin: number;
-    account: number;
-    change: number;
-    index: number;
-  };
 }

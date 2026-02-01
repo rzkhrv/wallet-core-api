@@ -19,6 +19,7 @@ describe('Wallet Core API (e2e)', () => {
   let tronAddress: string;
   let tronPrivateKey: string;
   let tronRawJson: string;
+  let tronTrc20RawJson: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -50,6 +51,29 @@ describe('Wallet Core API (e2e)', () => {
     expect(response.body.status).toBe('ok');
     expect(response.body.service).toBe('wallet-core-api');
     expect(response.body.timestamp).toBeDefined();
+  });
+
+  it.each([
+    ['GET /admin/test', '/admin/test'],
+    ['GET /api/v1/mnemonic/admin/test', '/api/v1/mnemonic/admin/test'],
+    ['GET /api/v1/address/btc/admin/test', '/api/v1/address/btc/admin/test'],
+    ['GET /api/v1/address/eth/admin/test', '/api/v1/address/eth/admin/test'],
+    ['GET /api/v1/address/tron/admin/test', '/api/v1/address/tron/admin/test'],
+    [
+      'GET /api/v1/transaction/btc/admin/test',
+      '/api/v1/transaction/btc/admin/test',
+    ],
+    [
+      'GET /api/v1/transaction/eth/admin/test',
+      '/api/v1/transaction/eth/admin/test',
+    ],
+    [
+      'GET /api/v1/transaction/tron/admin/test',
+      '/api/v1/transaction/tron/admin/test',
+    ],
+  ])('%s', async (_label: string, path: string) => {
+    const response = await request(app.getHttpServer()).get(path).expect(200);
+    expect(response.body.status).toBe('ok');
   });
 
   it('POST /api/v1/mnemonic/generate', async () => {
@@ -161,6 +185,52 @@ describe('Wallet Core API (e2e)', () => {
     tronRawJson = response.body.rawJson;
   });
 
+  it('POST /api/v1/transaction/tron/build-transfer rejects invalid address', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/transaction/tron/build-transfer')
+      .send({
+        ownerAddress: 'invalid',
+        toAddress: tronAddress,
+        amount: '1',
+      })
+      .expect(400);
+  });
+
+  it('POST /api/v1/transaction/tron/build-transaction (trc20)', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/transaction/tron/build-transaction')
+      .send({
+        transferType: 'trc20',
+        ownerAddress: tronAddress,
+        toAddress: tronAddress,
+        contractAddress: tronAddress,
+        amount: '1',
+        feeLimit: '10000000',
+        callValue: '0',
+      })
+      .expect(201);
+
+    expect(response.body.rawJson).toBeDefined();
+    const parsed = JSON.parse(response.body.rawJson);
+    expect(parsed.triggerSmartContract).toBeDefined();
+    tronTrc20RawJson = response.body.rawJson;
+  });
+
+  it('POST /api/v1/transaction/tron/build-transaction rejects invalid contract', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/transaction/tron/build-transaction')
+      .send({
+        transferType: 'trc20',
+        ownerAddress: tronAddress,
+        toAddress: tronAddress,
+        contractAddress: 'invalid',
+        amount: '1',
+        feeLimit: '10000000',
+        callValue: '0',
+      })
+      .expect(400);
+  });
+
   it('POST /api/v1/transaction/tron/sign-transfer', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/sign-transfer')
@@ -191,6 +261,19 @@ describe('Wallet Core API (e2e)', () => {
       .post('/api/v1/transaction/tron/sign-transaction')
       .send({
         rawJson: tronRawJson,
+        privateKey: tronPrivateKey,
+      })
+      .expect(201);
+
+    expect(response.body.txId).toBeDefined();
+    expect(response.body.signature).toBeDefined();
+  });
+
+  it('POST /api/v1/transaction/tron/sign-transaction (trc20)', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/transaction/tron/sign-transaction')
+      .send({
+        rawJson: tronTrc20RawJson,
         privateKey: tronPrivateKey,
       })
       .expect(201);

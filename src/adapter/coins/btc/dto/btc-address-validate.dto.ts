@@ -1,7 +1,6 @@
+/**
+ * Adapter request payload for BTC address validation.
+ */
 export interface BtcAddressValidateAdapterRequest {
   address: string;
-}
-
-export interface BtcAddressValidateAdapterResponse {
-  isValid: boolean;
 }

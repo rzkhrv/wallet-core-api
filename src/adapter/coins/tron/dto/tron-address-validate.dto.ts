@@ -1,7 +1,6 @@
+/**
+ * Adapter request payload for TRON address validation.
+ */
 export interface TronAddressValidateAdapterRequest {
   address: string;
-}
-
-export interface TronAddressValidateAdapterResponse {
-  isValid: boolean;
 }

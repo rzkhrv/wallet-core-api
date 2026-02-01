@@ -5,20 +5,19 @@ import { AdapterError } from '../../common/adapter-error';
 import { WalletCoreAdapter } from '../../common/wallet-core.adapter';
 import { CoinAddressAdapter } from '../coin-adapter.contracts';
 import type { WalletCore } from '@trustwallet/wallet-core';
-import {
-  TronAddressGenerateAdapterRequest,
-  TronAddressGenerateAdapterResponse,
-} from './dto/tron-address-generate.dto';
-import {
-  TronAddressValidateAdapterRequest,
-  TronAddressValidateAdapterResponse,
-} from './dto/tron-address-validate.dto';
+import { TronAddressGenerateAdapterRequest } from './dto/tron-address-generate.dto';
+import { TronAddressGenerateAdapterResponse } from './dto/tron-address-generate-response.dto';
+import { TronAddressValidateAdapterRequest } from './dto/tron-address-validate.dto';
+import { TronAddressValidateAdapterResponse } from './dto/tron-address-validate-response.dto';
 
 type AnyAddressInstance = InstanceType<WalletCore['AnyAddress']>;
 type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
+/**
+ * Adapter for TRON address generation and validation using wallet-core.
+ */
 @Injectable()
 export class TronAddressAdapter implements CoinAddressAdapter<
   TronAddressGenerateAdapterRequest,
@@ -26,6 +25,11 @@ export class TronAddressAdapter implements CoinAddressAdapter<
 > {
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
+  /**
+   * Generates a TRON address and keys.
+   * @param input Adapter request payload.
+   * @returns Generated address response.
+   */
   generate(
     input: TronAddressGenerateAdapterRequest,
   ): TronAddressGenerateAdapterResponse {
@@ -90,6 +94,11 @@ export class TronAddressAdapter implements CoinAddressAdapter<
     }
   }
 
+  /**
+   * Validates a TRON address.
+   * @param input Adapter request payload.
+   * @returns Validation response.
+   */
   validate(
     input: TronAddressValidateAdapterRequest,
   ): TronAddressValidateAdapterResponse {

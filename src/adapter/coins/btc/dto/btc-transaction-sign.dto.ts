@@ -1,15 +1,7 @@
+/**
+ * Adapter request payload for BTC transaction signing.
+ */
 export interface BtcSignTransactionAdapterRequest {
   payload: string;
   privateKeys: string[];
-}
-
-export interface BtcSignTransactionAdapterResponse {
-  rawTx: string;
-  txId: string;
-  plan: {
-    amount: string;
-    availableAmount: string;
-    fee: string;
-    change: string;
-  };
 }

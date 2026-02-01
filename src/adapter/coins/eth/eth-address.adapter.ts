@@ -5,20 +5,19 @@ import { Coin } from '../../../coins/enum/coin.enum';
 import { AdapterError } from '../../common/adapter-error';
 import { WalletCoreAdapter } from '../../common/wallet-core.adapter';
 import { CoinAddressAdapter } from '../coin-adapter.contracts';
-import {
-  EthAddressGenerateAdapterRequest,
-  EthAddressGenerateAdapterResponse,
-} from './dto/eth-address-generate.dto';
-import {
-  EthAddressValidateAdapterRequest,
-  EthAddressValidateAdapterResponse,
-} from './dto/eth-address-validate.dto';
+import { EthAddressGenerateAdapterRequest } from './dto/eth-address-generate.dto';
+import { EthAddressGenerateAdapterResponse } from './dto/eth-address-generate-response.dto';
+import { EthAddressValidateAdapterRequest } from './dto/eth-address-validate.dto';
+import { EthAddressValidateAdapterResponse } from './dto/eth-address-validate-response.dto';
 
 type AnyAddressInstance = InstanceType<WalletCore['AnyAddress']>;
 type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
+/**
+ * Adapter for ETH address generation and validation using wallet-core.
+ */
 @Injectable()
 export class EthAddressAdapter implements CoinAddressAdapter<
   EthAddressGenerateAdapterRequest,
@@ -26,6 +25,11 @@ export class EthAddressAdapter implements CoinAddressAdapter<
 > {
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
+  /**
+   * Generates an ETH address and keys.
+   * @param input Adapter request payload.
+   * @returns Generated address response.
+   */
   generate(
     input: EthAddressGenerateAdapterRequest,
   ): EthAddressGenerateAdapterResponse {
@@ -94,6 +98,11 @@ export class EthAddressAdapter implements CoinAddressAdapter<
     }
   }
 
+  /**
+   * Validates an ETH address.
+   * @param input Adapter request payload.
+   * @returns Validation response.
+   */
   validate(
     input: EthAddressValidateAdapterRequest,
   ): EthAddressValidateAdapterResponse {

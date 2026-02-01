@@ -22,5 +22,10 @@ describe('AppController', () => {
       expect(result.service).toBe('wallet-core-api');
       expect(result.timestamp).toBeDefined();
     });
+
+    it('should return admin test status', () => {
+      const result: { status: string } = appController.adminTest();
+      expect(result.status).toBe('ok');
+    });
   });
 });

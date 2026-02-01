@@ -3,14 +3,10 @@ import { Coin } from '../../../coins/enum/coin.enum';
 import { resolveCoinConfig } from '../../../coins/coin.config';
 import { AdapterError } from '../../common/adapter-error';
 import { WalletCoreAdapter } from '../../common/wallet-core.adapter';
-import {
-  BtcAddressGenerateAdapterRequest,
-  BtcAddressGenerateAdapterResponse,
-} from './dto/btc-address-generate.dto';
-import {
-  BtcAddressValidateAdapterRequest,
-  BtcAddressValidateAdapterResponse,
-} from './dto/btc-address-validate.dto';
+import { BtcAddressGenerateAdapterRequest } from './dto/btc-address-generate.dto';
+import { BtcAddressGenerateAdapterResponse } from './dto/btc-address-generate-response.dto';
+import { BtcAddressValidateAdapterRequest } from './dto/btc-address-validate.dto';
+import { BtcAddressValidateAdapterResponse } from './dto/btc-address-validate-response.dto';
 import { CoinAddressAdapter } from '../coin-adapter.contracts';
 import type { WalletCore } from '@trustwallet/wallet-core';
 
@@ -19,6 +15,9 @@ type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
+/**
+ * Adapter for BTC address generation and validation using wallet-core.
+ */
 @Injectable()
 export class BtcAddressAdapter implements CoinAddressAdapter<
   BtcAddressGenerateAdapterRequest,
@@ -26,6 +25,11 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
 > {
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
+  /**
+   * Generates a BTC address and keys.
+   * @param input Adapter request payload.
+   * @returns Generated address response.
+   */
   generate(
     input: BtcAddressGenerateAdapterRequest,
   ): BtcAddressGenerateAdapterResponse {
@@ -95,6 +99,11 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
     }
   }
 
+  /**
+   * Validates a BTC address.
+   * @param input Adapter request payload.
+   * @returns Validation response.
+   */
   validate(
     input: BtcAddressValidateAdapterRequest,
   ): BtcAddressValidateAdapterResponse {

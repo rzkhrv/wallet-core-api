@@ -5,12 +5,20 @@ import { ValidateMnemonicRequestDto } from './dto/request/validate-mnemonic.requ
 import { GenerateMnemonicResponseDto } from './dto/response/generate-mnemonic.response.dto';
 import { ValidateMnemonicResponseDto } from './dto/response/validate-mnemonic.response.dto';
 
+/**
+ * Provides mnemonic generation and validation operations.
+ */
 @Injectable()
 export class MnemonicService {
   private readonly logger = new Logger(MnemonicService.name);
 
   constructor(private readonly mnemonicAdapter: MnemonicAdapter) {}
 
+  /**
+   * Generates a mnemonic phrase.
+   * @param request Request payload.
+   * @returns Generated mnemonic response.
+   */
   generate(request: GenerateMnemonicRequestDto): GenerateMnemonicResponseDto {
     this.logger.log(
       `Generating mnemonic (strength=${request.strength}, passphraseUsed=${Boolean(
@@ -23,6 +31,11 @@ export class MnemonicService {
     });
   }
 
+  /**
+   * Validates a mnemonic phrase.
+   * @param request Request payload.
+   * @returns Validation result.
+   */
   validate(request: ValidateMnemonicRequestDto): ValidateMnemonicResponseDto {
     this.logger.log('Validating mnemonic');
     return this.mnemonicAdapter.validate({

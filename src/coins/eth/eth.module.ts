@@ -5,6 +5,9 @@ import { EthTransactionController } from './eth-transaction.controller';
 import { EthAddressService } from './service/eth-address.service';
 import { EthTransactionService } from './service/eth-transaction.service';
 
+/**
+ * Module for ETH address and transaction endpoints.
+ */
 @Module({
   imports: [AdapterModule],
   controllers: [EthAddressController, EthTransactionController],

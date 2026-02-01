@@ -1,3 +1,6 @@
+/**
+ * Adapter request payload for ETH transaction building.
+ */
 export interface EthTransactionBuildAdapterRequest {
   chainId: string;
   nonce: string;
@@ -5,8 +8,4 @@ export interface EthTransactionBuildAdapterRequest {
   gasLimit: string;
   toAddress: string;
   amount: string;
-}
-
-export interface EthTransactionBuildAdapterResponse {
-  payload: string;
 }

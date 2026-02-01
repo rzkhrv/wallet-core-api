@@ -5,6 +5,9 @@ import { TronTransactionController } from './tron-transaction.controller';
 import { TronAddressService } from './service/tron-address.service';
 import { TronTransactionService } from './service/tron-transaction.service';
 
+/**
+ * Module for TRON address and transaction endpoints.
+ */
 @Module({
   imports: [AdapterModule],
   controllers: [TronAddressController, TronTransactionController],

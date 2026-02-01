@@ -1,23 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TW } from '@trustwallet/wallet-core';
-import {
-  resolveCoinConfig,
-  type ResolvedCoinConfig,
-} from '../../../coins/coin.config';
+import { resolveCoinConfig } from '../../../coins/coin.config';
+import type { ResolvedCoinConfig } from '../../../coins/resolved-coin-config.interface';
 import { Coin } from '../../../coins/enum/coin.enum';
 import { AdapterError } from '../../common/adapter-error';
 import { WalletCoreAdapter } from '../../common/wallet-core.adapter';
 import { CoinTransactionAdapter } from '../coin-adapter.contracts';
-import {
-  BtcBuildTransactionAdapterRequest,
-  BtcBuildTransactionAdapterResponse,
-} from './dto/btc-transaction-build.dto';
-import {
-  BtcSignTransactionAdapterRequest,
-  BtcSignTransactionAdapterResponse,
-} from './dto/btc-transaction-sign.dto';
+import { BtcBuildTransactionAdapterRequest } from './dto/btc-transaction-build.dto';
+import { BtcBuildTransactionAdapterResponse } from './dto/btc-transaction-build-response.dto';
+import { BtcSignTransactionAdapterRequest } from './dto/btc-transaction-sign.dto';
+import { BtcSignTransactionAdapterResponse } from './dto/btc-transaction-sign-response.dto';
 import Long from 'long';
 
+/**
+ * Adapter for BTC transaction build and signing using wallet-core.
+ */
 @Injectable()
 export class BtcTransactionAdapter implements CoinTransactionAdapter<
   BtcBuildTransactionAdapterRequest,
@@ -27,6 +24,11 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
 
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
+  /**
+   * Builds a BTC transaction payload and plan.
+   * @param input Adapter request payload.
+   * @returns Build response with payload and plan.
+   */
   buildTransaction(
     input: BtcBuildTransactionAdapterRequest,
   ): BtcBuildTransactionAdapterResponse {
@@ -57,6 +59,11 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     }
   }
 
+  /**
+   * Signs a BTC transaction payload.
+   * @param input Adapter request payload.
+   * @returns Signed transaction response.
+   */
   signTransaction(
     input: BtcSignTransactionAdapterRequest,
   ): BtcSignTransactionAdapterResponse {

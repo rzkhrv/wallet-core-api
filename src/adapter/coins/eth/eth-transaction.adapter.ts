@@ -5,23 +5,18 @@ import { Coin } from '../../../coins/enum/coin.enum';
 import { AdapterError } from '../../common/adapter-error';
 import { WalletCoreAdapter } from '../../common/wallet-core.adapter';
 import { CoinTransactionAdapter } from '../coin-adapter.contracts';
-import {
-  EthErc20TransferBuildAdapterRequest,
-  EthErc20TransferBuildAdapterResponse,
-} from './dto/eth-erc20-transfer.dto';
-import {
-  EthErc20TransferSignAdapterRequest,
-  EthErc20TransferSignAdapterResponse,
-} from './dto/eth-erc20-transfer-sign.dto';
-import {
-  EthTransactionBuildAdapterRequest,
-  EthTransactionBuildAdapterResponse,
-} from './dto/eth-transaction-build.dto';
-import {
-  EthTransactionSignAdapterRequest,
-  EthTransactionSignAdapterResponse,
-} from './dto/eth-transaction-sign.dto';
+import { EthErc20TransferBuildAdapterRequest } from './dto/eth-erc20-transfer.dto';
+import { EthErc20TransferBuildAdapterResponse } from './dto/eth-erc20-transfer-response.dto';
+import { EthErc20TransferSignAdapterRequest } from './dto/eth-erc20-transfer-sign.dto';
+import { EthErc20TransferSignAdapterResponse } from './dto/eth-erc20-transfer-sign-response.dto';
+import { EthTransactionBuildAdapterRequest } from './dto/eth-transaction-build.dto';
+import { EthTransactionBuildAdapterResponse } from './dto/eth-transaction-build-response.dto';
+import { EthTransactionSignAdapterRequest } from './dto/eth-transaction-sign.dto';
+import { EthTransactionSignAdapterResponse } from './dto/eth-transaction-sign-response.dto';
 
+/**
+ * Adapter for ETH transaction build and signing using wallet-core.
+ */
 @Injectable()
 export class EthTransactionAdapter implements CoinTransactionAdapter<
   EthTransactionBuildAdapterRequest,
@@ -33,6 +28,11 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
 
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
+  /**
+   * Builds an ETH transaction payload.
+   * @param input Adapter request payload.
+   * @returns Build response with payload.
+   */
   buildTransaction(
     input: EthTransactionBuildAdapterRequest,
   ): EthTransactionBuildAdapterResponse {
@@ -55,6 +55,11 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
     }
   }
 
+  /**
+   * Builds an ERC20 transfer payload.
+   * @param input Adapter request payload.
+   * @returns Build response with payload.
+   */
   buildTransfer(
     input: EthErc20TransferBuildAdapterRequest,
   ): EthErc20TransferBuildAdapterResponse {
@@ -77,6 +82,11 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
     }
   }
 
+  /**
+   * Signs an ETH transaction payload.
+   * @param input Adapter request payload.
+   * @returns Signed transaction response.
+   */
   signTransaction(
     input: EthTransactionSignAdapterRequest,
   ): EthTransactionSignAdapterResponse {
@@ -94,6 +104,11 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
     );
   }
 
+  /**
+   * Signs an ERC20 transfer payload.
+   * @param input Adapter request payload.
+   * @returns Signed transfer response.
+   */
   signTransfer(
     input: EthErc20TransferSignAdapterRequest,
   ): EthErc20TransferSignAdapterResponse {
@@ -223,7 +238,7 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
   }
 
   private toBytes(value: string): Uint8Array {
-    const normalized = this.normalizeHex(value);
+    const normalized = this.normalizeNumeric(value);
     if (normalized.length === 0) {
       return new Uint8Array([0]);
     }
@@ -231,15 +246,19 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
     return this.walletCore.getCore().HexCoding.decode(even);
   }
 
+  private normalizeNumeric(value: string): string {
+    if (value.startsWith('0x') || value.startsWith('0X')) {
+      return value.slice(2);
+    }
+    const asBigInt = BigInt(value);
+    return asBigInt.toString(16);
+  }
+
   private normalizeHex(value: string): string {
     if (value.startsWith('0x') || value.startsWith('0X')) {
       return value.slice(2);
     }
-    if (/^[0-9a-fA-F]+$/.test(value)) {
-      return value;
-    }
-    const asBigInt = BigInt(value);
-    return asBigInt === 0n ? '00' : asBigInt.toString(16);
+    return value;
   }
 
   private normalizeHexBytes(value: string): string {

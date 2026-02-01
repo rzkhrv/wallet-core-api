@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateMnemonicRequestDto } from './dto/request/generate-mnemonic.request.dto';
 import { ValidateMnemonicRequestDto } from './dto/request/validate-mnemonic.request.dto';
@@ -6,15 +6,27 @@ import { GenerateMnemonicResponseDto } from './dto/response/generate-mnemonic.re
 import { ValidateMnemonicResponseDto } from './dto/response/validate-mnemonic.response.dto';
 import { MnemonicService } from './mnemonic.service';
 
+type AdminTestResponse = {
+  status: 'ok';
+};
+
+/**
+ * Handles mnemonic generation and validation endpoints.
+ */
 @ApiTags('Mnemonic')
 @Controller('api/v1/mnemonic')
 export class MnemonicController {
   constructor(private readonly mnemonicService: MnemonicService) {}
 
+  /**
+   * Generates a mnemonic phrase for a given strength.
+   * @param body Request payload.
+   * @returns Generated mnemonic response.
+   */
   @Post('generate')
   @ApiOperation({ summary: 'Generate mnemonic' })
   @ApiBody({ type: GenerateMnemonicRequestDto })
-  @ApiResponse({ status: 200, type: GenerateMnemonicResponseDto })
+  @ApiResponse({ status: 201, type: GenerateMnemonicResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   generate(
     @Body() body: GenerateMnemonicRequestDto,
@@ -22,14 +34,30 @@ export class MnemonicController {
     return this.mnemonicService.generate(body);
   }
 
+  /**
+   * Validates a mnemonic phrase.
+   * @param body Request payload.
+   * @returns Validation result.
+   */
   @Post('validate')
   @ApiOperation({ summary: 'Validate mnemonic' })
   @ApiBody({ type: ValidateMnemonicRequestDto })
-  @ApiResponse({ status: 200, type: ValidateMnemonicResponseDto })
+  @ApiResponse({ status: 201, type: ValidateMnemonicResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   validate(
     @Body() body: ValidateMnemonicRequestDto,
   ): ValidateMnemonicResponseDto {
     return this.mnemonicService.validate(body);
+  }
+
+  /**
+   * Returns a simple admin smoke test response.
+   * @returns Admin test response.
+   */
+  @Get('admin/test')
+  @ApiOperation({ summary: 'Admin smoke test' })
+  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
+  adminTest(): AdminTestResponse {
+    return { status: 'ok' };
   }
 }

@@ -70,6 +70,29 @@ describe('TRON transaction service', () => {
     );
   });
 
+  it('builds TRC20 transaction when transferType is trc20', () => {
+    const { adapter, service } = makeService();
+    const result = service.buildTransaction({
+      transferType: 'trc20',
+      ownerAddress: 'TXYZ',
+      toAddress: 'TABC',
+      contractAddress: 'TCONTRACT',
+      amount: '100',
+      callValue: '0',
+      feeLimit: '10000000',
+    });
+
+    expect(result).toBe(buildResponse);
+    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transferType: 'trc20',
+        contractAddress: 'TCONTRACT',
+        callValue: '0',
+        feeLimit: '10000000',
+      }),
+    );
+  });
+
   it('signs raw transfer when rawJson is a transfer contract', () => {
     const { adapter, service } = makeService();
     const result = service.signRawTransfer({

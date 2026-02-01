@@ -8,6 +8,9 @@ import { EthTransactionAdapter } from './coins/eth/eth-transaction.adapter';
 import { TronAddressAdapter } from './coins/tron/tron-address.adapter';
 import { TronTransactionAdapter } from './coins/tron/tron-transaction.adapter';
 
+/**
+ * Module providing wallet-core adapters.
+ */
 @Module({
   providers: [
     WalletCoreAdapter,

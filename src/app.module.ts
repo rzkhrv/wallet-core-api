@@ -5,6 +5,9 @@ import { CommonModule } from './common/common.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+/**
+ * Root application module.
+ */
 @Module({
   imports: [AdapterModule, CoinsModule, CommonModule],
   controllers: [AppController],

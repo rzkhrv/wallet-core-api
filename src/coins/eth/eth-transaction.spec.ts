@@ -1,7 +1,32 @@
+import { TW } from '@trustwallet/wallet-core';
 import { EthTransactionAdapter } from '../../adapter/coins/eth/eth-transaction.adapter';
 import { AdapterError } from '../../adapter/common/adapter-error';
 import { WalletCoreAdapter } from '../../adapter/common/wallet-core.adapter';
 import { EthTransactionService } from './service/eth-transaction.service';
+
+const resolveEthTransferAmount = (
+  payload: string,
+  walletCore: WalletCoreAdapter,
+): bigint => {
+  const core: ReturnType<WalletCoreAdapter['getCore']> = walletCore.getCore();
+  const normalizedPayload: string =
+    payload.startsWith('0x') || payload.startsWith('0X')
+      ? payload.slice(2)
+      : payload;
+  const payloadBytes: Uint8Array = core.HexCoding.decode(normalizedPayload);
+  const signingInput: TW.Ethereum.Proto.SigningInput =
+    TW.Ethereum.Proto.SigningInput.decode(payloadBytes);
+  const amountBytes: Uint8Array =
+    signingInput.transaction?.transfer?.amount ?? new Uint8Array();
+  const amountHex: string = core.HexCoding.encode(amountBytes);
+  const normalizedHex: string =
+    amountHex.startsWith('0x') || amountHex.startsWith('0X')
+      ? amountHex.slice(2)
+      : amountHex;
+  const safeHex: string = normalizedHex.length === 0 ? '0' : normalizedHex;
+  const amount: bigint = BigInt(`0x${safeHex}`);
+  return amount;
+};
 
 describe('ETH transaction signing', () => {
   let walletCore: WalletCoreAdapter;
@@ -63,6 +88,35 @@ describe('ETH transaction signing', () => {
     });
 
     expect(result.payload).toBeDefined();
+  });
+
+  it('parses decimal and hex amounts in build payload (adapter)', () => {
+    const decimalPayload: string = transactionAdapter.buildTransaction({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '10',
+    }).payload;
+    const decimalAmount: bigint = resolveEthTransferAmount(
+      decimalPayload,
+      walletCore,
+    );
+    expect(decimalAmount).toBe(10n);
+    const hexPayload: string = transactionAdapter.buildTransaction({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '0x10',
+    }).payload;
+    const hexAmount: bigint = resolveEthTransferAmount(
+      hexPayload,
+      walletCore,
+    );
+    expect(hexAmount).toBe(16n);
   });
 
   it('signs ETH transaction (adapter)', () => {

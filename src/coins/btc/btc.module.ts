@@ -5,6 +5,9 @@ import { BtcTransactionController } from './btc-transaction.controller';
 import { BtcAddressService } from './service/btc-address.service';
 import { BtcTransactionService } from './service/btc-transaction.service';
 
+/**
+ * Module for BTC address and transaction endpoints.
+ */
 @Module({
   imports: [AdapterModule],
   controllers: [BtcAddressController, BtcTransactionController],

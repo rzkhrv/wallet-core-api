@@ -1,4 +1,7 @@
-export interface BtcUtxoInput {
+/**
+ * UTXO input data for BTC transaction building.
+ */
+interface BtcUtxoInput {
   txid: string;
   vout: number;
   amount: string;
@@ -6,6 +9,9 @@ export interface BtcUtxoInput {
   reverseTxId?: boolean;
 }
 
+/**
+ * Adapter request payload for BTC transaction building.
+ */
 export interface BtcBuildTransactionAdapterRequest {
   toAddress: string;
   changeAddress: string;
@@ -14,14 +20,4 @@ export interface BtcBuildTransactionAdapterRequest {
   utxos: BtcUtxoInput[];
   hashType?: number;
   useMaxAmount?: boolean;
-}
-
-export interface BtcBuildTransactionAdapterResponse {
-  payload: string;
-  plan: {
-    amount: string;
-    availableAmount: string;
-    fee: string;
-    change: string;
-  };
 }
