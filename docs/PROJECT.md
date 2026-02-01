@@ -36,7 +36,7 @@
 - Wallet-core WASM objects are manually released via `.delete()` in `finally` blocks.
 
 ## Documentation lookup (required)
-- Use the `context7` MCP server as the primary source for library/framework documentation.
+- Use the `context7` MCP server as the primary source for documentation on NestJS, TypeScript, wallet-core, and cryptocurrency topics.
 - If Context7 does not cover what you need, consult other sources (prefer official docs and primary references).
 
 ## Where to look first (common tasks)

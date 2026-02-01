@@ -14,6 +14,7 @@ Understand what the service does, where the main entry points live, and how requ
 - Swagger UI served at `/api`.
 - POST endpoints return HTTP 201; Swagger responses use 201 to match runtime defaults.
 - TRON transactions: `build-transaction` for TRX, `build-transfer` for TRC10/TRC20.
+- Documentation lookup: always check MCP Context7 first for NestJS, TypeScript, wallet-core, and crypto references.
 
 ## Steps
 1. Read `docs/PROJECT.md` for architecture and conventions.

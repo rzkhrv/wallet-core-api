@@ -8,7 +8,6 @@
 ## Findings (2026-01-31)
 - Decimal or hex parsing in ETH/TRON adapters treats digit-only values as hex (BD: wallet-core-api-wwk).
 - Swagger @ApiResponse status codes for POST routes show 200 while runtime defaults to 201 (BD: wallet-core-api-idr).
-- Controllers are missing admin/test smoke endpoints required by coding rules (BD: wallet-core-api-5fq).
 - TRON transaction DTOs do not validate owner/to/contract addresses (BD: wallet-core-api-zfk).
 - any is used in TRON rawJson parsing logic (BD: wallet-core-api-svr).
 - Public API layer classes and methods lack JSDoc (BD: wallet-core-api-psx).
@@ -19,4 +18,4 @@
 - docs/coding-rules.md
 - docs/WORKFLOW.md
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

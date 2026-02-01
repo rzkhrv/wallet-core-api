@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BuildEthErc20TransferRequestDto } from './dto/request/build-eth-erc20-transfer.request.dto';
 import { BuildEthTransactionRequestDto } from './dto/request/build-eth-transaction.request.dto';
@@ -7,10 +7,6 @@ import { BuildEthErc20TransferResponseDto } from './dto/response/build-eth-erc20
 import { BuildEthTransactionResponseDto } from './dto/response/build-eth-transaction.response.dto';
 import { SignEthTransactionResponseDto } from './dto/response/sign-eth-transaction.response.dto';
 import { EthTransactionService } from './service/eth-transaction.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles ETH transaction endpoints.
@@ -68,14 +64,4 @@ export class EthTransactionController {
     return this.ethTransactionService.sign(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

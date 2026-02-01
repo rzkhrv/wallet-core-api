@@ -1,14 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateTronAddressRequestDto } from './dto/request/generate-tron-address.request.dto';
 import { ValidateTronAddressRequestDto } from './dto/request/validate-tron-address.request.dto';
 import { GenerateTronAddressResponseDto } from './dto/response/generate-tron-address.response.dto';
 import { ValidateTronAddressResponseDto } from './dto/response/validate-tron-address.response.dto';
 import { TronAddressService } from './service/tron-address.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles TRON address endpoints.
@@ -50,14 +46,4 @@ export class TronAddressController {
     return this.tronAddressService.validate(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

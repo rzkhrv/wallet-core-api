@@ -1,14 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateMnemonicRequestDto } from './dto/request/generate-mnemonic.request.dto';
 import { ValidateMnemonicRequestDto } from './dto/request/validate-mnemonic.request.dto';
 import { GenerateMnemonicResponseDto } from './dto/response/generate-mnemonic.response.dto';
 import { ValidateMnemonicResponseDto } from './dto/response/validate-mnemonic.response.dto';
 import { MnemonicService } from './mnemonic.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles mnemonic generation and validation endpoints.
@@ -50,14 +46,4 @@ export class MnemonicController {
     return this.mnemonicService.validate(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

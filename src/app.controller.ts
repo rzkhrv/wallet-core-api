@@ -2,10 +2,6 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import type { HealthStatus } from './app-health-status';
 
-type AdminTestResponse = {
-  status: 'ok';
-};
-
 /**
  * Handles application-level health endpoints.
  */
@@ -22,12 +18,4 @@ export class AppController {
     return this.appService.getHealth();
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

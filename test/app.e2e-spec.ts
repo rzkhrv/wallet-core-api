@@ -85,30 +85,6 @@ describe('Wallet Core API (e2e)', () => {
     expect(body.timestamp).toBeDefined();
   });
 
-  it.each([
-    ['GET /admin/test', '/admin/test'],
-    ['GET /api/v1/mnemonic/admin/test', '/api/v1/mnemonic/admin/test'],
-    ['GET /api/v1/address/btc/admin/test', '/api/v1/address/btc/admin/test'],
-    ['GET /api/v1/address/eth/admin/test', '/api/v1/address/eth/admin/test'],
-    ['GET /api/v1/address/tron/admin/test', '/api/v1/address/tron/admin/test'],
-    [
-      'GET /api/v1/transaction/btc/admin/test',
-      '/api/v1/transaction/btc/admin/test',
-    ],
-    [
-      'GET /api/v1/transaction/eth/admin/test',
-      '/api/v1/transaction/eth/admin/test',
-    ],
-    [
-      'GET /api/v1/transaction/tron/admin/test',
-      '/api/v1/transaction/tron/admin/test',
-    ],
-  ])('%s', async (_label: string, path: string) => {
-    const response = await request(app.getHttpServer()).get(path).expect(200);
-    const body = response.body as StatusResponse;
-    expect(body.status).toBe('ok');
-  });
-
   it('POST /api/v1/mnemonic/generate', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/mnemonic/generate')

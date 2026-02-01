@@ -1,20 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TronTransactionController } from './tron-transaction.controller';
 import { TronTransactionService } from './service/tron-transaction.service';
+import type { BuildTronTransactionRequestDto } from './dto/request/build-tron-transaction.request.dto';
+import type { BuildTronTransferRequestDto } from './dto/request/build-tron-transfer.request.dto';
+import type { SignTronRawTransactionRequestDto } from './dto/request/sign-tron-raw-transaction.request.dto';
+import type { BuildTronTransactionResponseDto } from './dto/response/build-tron-transaction.response.dto';
+import type { SignTronTransactionResponseDto } from './dto/response/sign-tron-transaction.response.dto';
 
 describe('TronTransactionController', () => {
   let controller: TronTransactionController;
+  let service: {
+    buildTransaction: jest.Mock;
+    buildTransfer: jest.Mock;
+    sign: jest.Mock;
+  };
+  const buildResponse: BuildTronTransactionResponseDto = {
+    rawJson: '{"transfer":{}}',
+  };
+  const signResponse: SignTronTransactionResponseDto = {
+    txId: 'txid',
+    signature: 'sig',
+    refBlockBytes: 'aa',
+    refBlockHash: 'bb',
+    signedJson: '{}',
+  };
   beforeEach(async () => {
+    service = {
+      buildTransaction: jest.fn().mockReturnValue(buildResponse),
+      buildTransfer: jest.fn().mockReturnValue(buildResponse),
+      sign: jest.fn().mockReturnValue(signResponse),
+    };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TronTransactionController],
       providers: [
         {
           provide: TronTransactionService,
-          useValue: {
-            buildTransaction: jest.fn(),
-            buildTransfer: jest.fn(),
-            sign: jest.fn(),
-          },
+          useValue: service,
         },
       ],
     }).compile();
@@ -22,8 +43,40 @@ describe('TronTransactionController', () => {
       TronTransactionController,
     );
   });
-  it('returns admin test status', () => {
-    const result: { status: string } = controller.adminTest();
-    expect(result.status).toBe('ok');
+
+  it('delegates build transfer', () => {
+    const body: BuildTronTransferRequestDto = {
+      transferType: 'trc20',
+      ownerAddress: 'TXYZ',
+      toAddress: 'TABC',
+      contractAddress: 'TCONTRACT',
+      amount: '1',
+      feeLimit: '10000000',
+      callValue: '0',
+    };
+    const result = controller.buildTransfer(body);
+    expect(service.buildTransfer).toHaveBeenCalledWith(body);
+    expect(result).toBe(buildResponse);
+  });
+
+  it('delegates build transaction', () => {
+    const body: BuildTronTransactionRequestDto = {
+      ownerAddress: 'TXYZ',
+      toAddress: 'TABC',
+      amount: '1',
+    };
+    const result = controller.buildTransaction(body);
+    expect(service.buildTransaction).toHaveBeenCalledWith(body);
+    expect(result).toBe(buildResponse);
+  });
+
+  it('delegates sign transaction', () => {
+    const body: SignTronRawTransactionRequestDto = {
+      rawJson: '{"raw_data":{}}',
+      privateKey: '00'.repeat(32),
+    };
+    const result = controller.sign(body);
+    expect(service.sign).toHaveBeenCalledWith(body);
+    expect(result).toBe(signResponse);
   });
 });

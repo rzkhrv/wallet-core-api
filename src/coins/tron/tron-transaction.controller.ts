@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BuildTronTransactionRequestDto } from './dto/request/build-tron-transaction.request.dto';
 import { BuildTronTransferRequestDto } from './dto/request/build-tron-transfer.request.dto';
@@ -6,10 +6,6 @@ import { SignTronRawTransactionRequestDto } from './dto/request/sign-tron-raw-tr
 import { BuildTronTransactionResponseDto } from './dto/response/build-tron-transaction.response.dto';
 import { SignTronTransactionResponseDto } from './dto/response/sign-tron-transaction.response.dto';
 import { TronTransactionService } from './service/tron-transaction.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles TRON transaction endpoints.
@@ -71,14 +67,4 @@ export class TronTransactionController {
     return this.tronTransactionService.sign(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

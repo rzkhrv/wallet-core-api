@@ -1,14 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateBtcAddressRequestDto } from './dto/request/generate-btc-address.request.dto';
 import { ValidateBtcAddressRequestDto } from './dto/request/validate-btc-address.request.dto';
 import { GenerateBtcAddressResponseDto } from './dto/response/generate-btc-address.response.dto';
 import { ValidateBtcAddressResponseDto } from './dto/response/validate-btc-address.response.dto';
 import { BtcAddressService } from './service/btc-address.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles BTC address endpoints.
@@ -50,14 +46,4 @@ export class BtcAddressController {
     return this.btcAddressService.validate(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }

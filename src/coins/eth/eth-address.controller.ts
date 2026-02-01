@@ -1,14 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GenerateEthAddressRequestDto } from './dto/request/generate-eth-address.request.dto';
 import { ValidateEthAddressRequestDto } from './dto/request/validate-eth-address.request.dto';
 import { GenerateEthAddressResponseDto } from './dto/response/generate-eth-address.response.dto';
 import { ValidateEthAddressResponseDto } from './dto/response/validate-eth-address.response.dto';
 import { EthAddressService } from './service/eth-address.service';
-
-type AdminTestResponse = {
-  status: 'ok';
-};
 
 /**
  * Handles ETH address endpoints.
@@ -50,14 +46,4 @@ export class EthAddressController {
     return this.ethAddressService.validate(body);
   }
 
-  /**
-   * Returns a simple admin smoke test response.
-   * @returns Admin test response.
-   */
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Admin smoke test' })
-  @ApiResponse({ status: 200, schema: { example: { status: 'ok' } } })
-  adminTest(): AdminTestResponse {
-    return { status: 'ok' };
-  }
 }
