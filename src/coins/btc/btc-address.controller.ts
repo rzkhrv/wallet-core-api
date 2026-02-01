@@ -45,5 +45,4 @@ export class BtcAddressController {
   ): ValidateBtcAddressResponseDto {
     return this.btcAddressService.validate(body);
   }
-
 }

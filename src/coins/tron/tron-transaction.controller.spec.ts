@@ -15,7 +15,17 @@ describe('TronTransactionController', () => {
     sign: jest.Mock;
   };
   const buildResponse: BuildTronTransactionResponseDto = {
-    rawJson: '{"transfer":{}}',
+    payload: '{"transfer":{}}',
+    transaction: {
+      type: 'trx',
+      ownerAddress: 'TXYZ',
+      toAddress: 'TABC',
+      amount: '1',
+      timestamp: '1',
+      expiration: '2',
+      feeLimit: null,
+      memo: null,
+    },
   };
   const signResponse: SignTronTransactionResponseDto = {
     txId: 'txid',
@@ -72,7 +82,7 @@ describe('TronTransactionController', () => {
 
   it('delegates sign transaction', () => {
     const body: SignTronRawTransactionRequestDto = {
-      rawJson: '{"raw_data":{}}',
+      payload: '0x7b227261775f64617461223a7b7d7d',
       privateKey: '00'.repeat(32),
     };
     const result = controller.sign(body);

@@ -17,7 +17,7 @@ export class BtcTransactionController {
   /**
    * Builds a BTC transaction from request data.
    * @param body Request payload.
-   * @returns Unsigned transaction payload and plan.
+   * @returns Unsigned transaction payload and intent.
    */
   @Post('build-transaction')
   @ApiOperation({ summary: 'Build BTC transaction' })
@@ -45,5 +45,4 @@ export class BtcTransactionController {
   ): SignBtcTransactionResponseDto {
     return this.btcTransactionService.sign(body);
   }
-
 }

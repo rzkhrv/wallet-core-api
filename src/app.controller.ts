@@ -17,5 +17,4 @@ export class AppController {
   getHealth(): HealthStatus {
     return this.appService.getHealth();
   }
-
 }

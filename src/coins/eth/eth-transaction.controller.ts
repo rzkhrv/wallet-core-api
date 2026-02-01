@@ -63,5 +63,4 @@ export class EthTransactionController {
   ): SignEthTransactionResponseDto {
     return this.ethTransactionService.sign(body);
   }
-
 }

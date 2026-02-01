@@ -52,12 +52,12 @@ export class TronTransactionController {
   }
 
   /**
-   * Signs a TRON transfer from raw JSON.
+   * Signs a TRON transfer from build payload.
    * @param body Request payload.
    * @returns Signed transaction response.
    */
   @Post('sign')
-  @ApiOperation({ summary: 'Sign TRON transaction or transfer from rawJson' })
+  @ApiOperation({ summary: 'Sign TRON transaction or transfer from payload' })
   @ApiBody({ type: SignTronRawTransactionRequestDto })
   @ApiResponse({ status: 201, type: SignTronTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -66,5 +66,4 @@ export class TronTransactionController {
   ): SignTronTransactionResponseDto {
     return this.tronTransactionService.sign(body);
   }
-
 }

@@ -58,7 +58,7 @@ describe('BTC transaction signing', () => {
     });
 
     expect(buildResult.payload).toBeDefined();
-    expect(buildResult.plan.amount).toBe('1000');
+    expect(buildResult.transaction.plan.amount).toBe('1000');
 
     const signResult = transactionAdapter.signTransaction({
       payload: buildResult.payload,

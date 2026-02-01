@@ -26,17 +26,38 @@ type AddressGenerateResponse = {
   keys: { public: string; private: string };
 };
 
-type TronBuildResponse = { rawJson: string };
+type TronBuildResponse = {
+  payload: string;
+  transaction: {
+    type: string;
+    ownerAddress?: string;
+    toAddress?: string;
+    amount?: string;
+    assetName?: string;
+    contractAddress?: string;
+    callValue?: string;
+    timestamp: string;
+    expiration: string;
+    feeLimit?: string | null;
+    memo?: string | null;
+  };
+};
 type TronSignResponse = { txId: string; signature: string };
 
-type BtcBuildResponse = { payload: string; plan?: { amount?: string } };
+type BtcBuildResponse = {
+  payload: string;
+  transaction: { plan?: { amount?: string } };
+};
 type BtcSignResponse = {
   rawTx: string;
   txId: string;
   plan?: { amount?: string };
 };
 
-type EthBuildResponse = { payload: string };
+type EthBuildResponse = {
+  payload: string;
+  transaction: Record<string, string>;
+};
 type EthSignResponse = { rawTx: string; signature?: { v?: string } };
 
 describe('Wallet Core API (e2e)', () => {
@@ -49,8 +70,8 @@ describe('Wallet Core API (e2e)', () => {
   let ethPrivateKey: string;
   let tronAddress: string;
   let tronPrivateKey: string;
-  let tronRawJson: string;
-  let tronTrc20RawJson: string;
+  let tronPayload: string;
+  let tronTrc20Payload: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -199,8 +220,12 @@ describe('Wallet Core API (e2e)', () => {
       .expect(201);
 
     const body = response.body as TronBuildResponse;
-    expect(body.rawJson).toBeDefined();
-    tronRawJson = body.rawJson;
+    expect(body.payload).toBeDefined();
+    expect(body.payload).toMatch(/^(0x)?[0-9a-fA-F]+$/);
+    expect(body.transaction.type).toBe('trx');
+    expect(body.transaction.ownerAddress).toBe(tronAddress);
+    expect(body.transaction.toAddress).toBe(tronAddress);
+    tronPayload = body.payload;
   });
 
   it('POST /api/v1/transaction/tron/build-transaction rejects invalid address', async () => {
@@ -229,12 +254,14 @@ describe('Wallet Core API (e2e)', () => {
       .expect(201);
 
     const body = response.body as TronBuildResponse;
-    expect(body.rawJson).toBeDefined();
-    const parsed = JSON.parse(body.rawJson) as {
-      triggerSmartContract?: Record<string, unknown>;
-    };
-    expect(parsed.triggerSmartContract).toBeDefined();
-    tronTrc20RawJson = body.rawJson;
+    expect(body.payload).toBeDefined();
+    expect(body.payload).toMatch(/^(0x)?[0-9a-fA-F]+$/);
+    expect(body.transaction.type).toBe('trc20');
+    expect(body.transaction.toAddress).toBe(tronAddress);
+    expect(body.transaction.amount).toBe('1');
+    expect(body.transaction.contractAddress).toBe(tronAddress);
+    expect(body.transaction.callValue).toBe('0');
+    tronTrc20Payload = body.payload;
   });
 
   it('POST /api/v1/transaction/tron/build-transfer rejects invalid contract', async () => {
@@ -256,7 +283,7 @@ describe('Wallet Core API (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/sign')
       .send({
-        rawJson: tronRawJson,
+        payload: tronPayload,
         privateKey: tronPrivateKey,
       })
       .expect(201);
@@ -270,7 +297,7 @@ describe('Wallet Core API (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/sign')
       .send({
-        rawJson: tronTrc20RawJson,
+        payload: tronTrc20Payload,
         privateKey: tronPrivateKey,
       })
       .expect(201);
@@ -284,7 +311,7 @@ describe('Wallet Core API (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/sign')
       .send({
-        rawJson: '{invalid',
+        payload: '0x7b696e76616c6964',
         privateKey: '00'.repeat(32),
       })
       .expect(400);
@@ -324,7 +351,7 @@ describe('Wallet Core API (e2e)', () => {
 
     const btcBuildBody = buildResponse.body as BtcBuildResponse;
     expect(btcBuildBody.payload).toBeDefined();
-    expect(btcBuildBody.plan?.amount).toBe('1000');
+    expect(btcBuildBody.transaction.plan?.amount).toBe('1000');
 
     const signResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/btc/sign')
@@ -355,6 +382,8 @@ describe('Wallet Core API (e2e)', () => {
 
     const ethBuildBody = buildResponse.body as EthBuildResponse;
     expect(ethBuildBody.payload).toBeDefined();
+    expect(ethBuildBody.transaction.chainId).toBe('1');
+    expect(ethBuildBody.transaction.toAddress).toBe(ethAddress);
 
     const signResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/eth/sign')
@@ -385,6 +414,8 @@ describe('Wallet Core API (e2e)', () => {
 
     const ethTransferBuildBody = buildResponse.body as EthBuildResponse;
     expect(ethTransferBuildBody.payload).toBeDefined();
+    expect(ethTransferBuildBody.transaction.chainId).toBe('1');
+    expect(ethTransferBuildBody.transaction.toAddress).toBe(ethAddress);
 
     const signResponse = await request(app.getHttpServer())
       .post('/api/v1/transaction/eth/sign')

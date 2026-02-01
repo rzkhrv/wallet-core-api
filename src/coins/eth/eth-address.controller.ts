@@ -45,5 +45,4 @@ export class EthAddressController {
   ): ValidateEthAddressResponseDto {
     return this.ethAddressService.validate(body);
   }
-
 }

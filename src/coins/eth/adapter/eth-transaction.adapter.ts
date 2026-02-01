@@ -5,11 +5,17 @@ import { AdapterError } from '../../../common/errors/adapter-error';
 import { WalletCoreAdapter } from '../../../common/wallet-core/wallet-core.adapter';
 import { CoinTransactionAdapter } from '../../../common/interfaces/coin-transaction-adapter.interface';
 import { EthErc20TransferBuildAdapterInput } from './dto/eth-erc20-transfer-build-input.dto';
-import { EthErc20TransferBuildAdapterOutput } from './dto/eth-erc20-transfer-build-output.dto';
+import {
+  EthErc20TransferBuildAdapterOutput,
+  EthErc20TransferIntent,
+} from './dto/eth-erc20-transfer-build-output.dto';
 import { EthErc20TransferSignAdapterInput } from './dto/eth-erc20-transfer-sign-input.dto';
 import { EthErc20TransferSignAdapterOutput } from './dto/eth-erc20-transfer-sign-output.dto';
 import { EthTransactionBuildAdapterInput } from './dto/eth-transaction-build-input.dto';
-import { EthTransactionBuildAdapterOutput } from './dto/eth-transaction-build-output.dto';
+import {
+  EthTransactionBuildAdapterOutput,
+  EthTransactionIntent,
+} from './dto/eth-transaction-build-output.dto';
 import { EthTransactionSignAdapterInput } from './dto/eth-transaction-sign-input.dto';
 import { EthTransactionSignAdapterOutput } from './dto/eth-transaction-sign-output.dto';
 
@@ -39,7 +45,10 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
 
     try {
       const signingInput = this.createTransferSigningInput(input);
-      return this.encodeSigningInput(signingInput);
+      return {
+        payload: this.encodeSigningInput(signingInput),
+        transaction: this.resolveTransferIntent(signingInput),
+      };
     } catch (error: unknown) {
       if (error instanceof AdapterError) {
         throw error;
@@ -67,7 +76,10 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
 
     try {
       const signingInput = this.createErc20SigningInput(input);
-      return this.encodeSigningInput(signingInput);
+      return {
+        payload: this.encodeSigningInput(signingInput),
+        transaction: this.resolveErc20TransferIntent(signingInput),
+      };
     } catch (error: unknown) {
       if (error instanceof AdapterError) {
         throw error;
@@ -164,15 +176,13 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
     });
   }
 
-  private encodeSigningInput(signingInput: TW.Ethereum.Proto.SigningInput): {
-    payload: string;
-  } {
+  private encodeSigningInput(
+    signingInput: TW.Ethereum.Proto.SigningInput,
+  ): string {
     const core = this.walletCore.getCore();
     const inputBytes =
       TW.Ethereum.Proto.SigningInput.encode(signingInput).finish();
-    return {
-      payload: core.HexCoding.encode(inputBytes),
-    };
+    return core.HexCoding.encode(inputBytes);
   }
 
   private decodeSigningInput(
@@ -266,5 +276,109 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
       return normalized;
     }
     return normalized.length % 2 === 0 ? normalized : `0${normalized}`;
+  }
+
+  private resolveTransferIntent(
+    signingInput: TW.Ethereum.Proto.SigningInput,
+  ): EthTransactionIntent {
+    const transaction = signingInput.transaction?.transfer;
+    if (!transaction) {
+      throw new AdapterError(
+        'ETH_TRANSACTION_BUILD_INCOMPLETE',
+        'ETH transfer payload missing transfer data',
+      );
+    }
+
+    return {
+      chainId: this.bytesToDecimal(
+        this.requireBytes(signingInput.chainId, 'chainId'),
+      ),
+      nonce: this.bytesToDecimal(
+        this.requireBytes(signingInput.nonce, 'nonce'),
+      ),
+      gasPrice: this.bytesToDecimal(
+        this.requireBytes(signingInput.gasPrice, 'gasPrice'),
+      ),
+      gasLimit: this.bytesToDecimal(
+        this.requireBytes(signingInput.gasLimit, 'gasLimit'),
+      ),
+      toAddress: this.requireString(signingInput.toAddress, 'toAddress'),
+      amount: this.bytesToDecimal(
+        this.requireBytes(transaction.amount, 'amount'),
+      ),
+    };
+  }
+
+  private resolveErc20TransferIntent(
+    signingInput: TW.Ethereum.Proto.SigningInput,
+  ): EthErc20TransferIntent {
+    const transaction = signingInput.transaction?.erc20Transfer;
+    if (!transaction) {
+      throw new AdapterError(
+        'ETH_ERC20_BUILD_INCOMPLETE',
+        'ETH ERC20 payload missing transfer data',
+      );
+    }
+
+    return {
+      chainId: this.bytesToDecimal(
+        this.requireBytes(signingInput.chainId, 'chainId'),
+      ),
+      nonce: this.bytesToDecimal(
+        this.requireBytes(signingInput.nonce, 'nonce'),
+      ),
+      gasPrice: this.bytesToDecimal(
+        this.requireBytes(signingInput.gasPrice, 'gasPrice'),
+      ),
+      gasLimit: this.bytesToDecimal(
+        this.requireBytes(signingInput.gasLimit, 'gasLimit'),
+      ),
+      toAddress: this.requireString(transaction.to, 'toAddress'),
+      tokenContract: this.requireString(
+        signingInput.toAddress,
+        'tokenContract',
+      ),
+      amount: this.bytesToDecimal(
+        this.requireBytes(transaction.amount, 'amount'),
+      ),
+    };
+  }
+
+  private bytesToDecimal(value: Uint8Array): string {
+    if (value.length === 0) {
+      return '0';
+    }
+    const hex = this.walletCore.getCore().HexCoding.encode(value);
+    const normalized = this.normalizeHex(hex);
+    const safeHex = normalized.length === 0 ? '0' : normalized;
+    return BigInt(`0x${safeHex}`).toString(10);
+  }
+
+  private requireBytes(
+    value: Uint8Array | null | undefined,
+    field: string,
+  ): Uint8Array {
+    if (!value) {
+      throw new AdapterError(
+        'ETH_TRANSACTION_BUILD_INCOMPLETE',
+        `ETH payload missing ${field}`,
+        { field },
+      );
+    }
+    return value;
+  }
+
+  private requireString(
+    value: string | null | undefined,
+    field: string,
+  ): string {
+    if (!value) {
+      throw new AdapterError(
+        'ETH_TRANSACTION_BUILD_INCOMPLETE',
+        `ETH payload missing ${field}`,
+        { field },
+      );
+    }
+    return value;
   }
 }

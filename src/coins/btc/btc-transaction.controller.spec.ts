@@ -11,17 +11,34 @@ describe('BtcTransactionController', () => {
   let service: { buildTransaction: jest.Mock; sign: jest.Mock };
   const buildResponse: BuildBtcTransactionResponseDto = {
     payload: 'deadbeef',
-    plan: {
+    transaction: {
+      toAddress: 'bc1qtest',
+      changeAddress: 'bc1qtest',
       amount: '1000',
-      availableAmount: '2000',
-      fee: '10',
-      change: '990',
+      byteFee: '1',
+      utxos: [
+        {
+          txid: 'a'.repeat(64),
+          vout: 0,
+          amount: '2000',
+          scriptPubKey: 'ABQ=',
+          reverseTxId: false,
+        },
+      ],
+      hashType: 1,
+      useMaxAmount: false,
+      plan: {
+        amount: '1000',
+        availableAmount: '2000',
+        fee: '10',
+        change: '990',
+      },
     },
   };
   const signResponse: SignBtcTransactionResponseDto = {
     rawTx: 'raw',
     txId: 'txid',
-    plan: buildResponse.plan,
+    plan: buildResponse.transaction.plan,
   };
   beforeEach(async () => {
     service = {
@@ -65,7 +82,6 @@ describe('BtcTransactionController', () => {
     const body: SignBtcTransactionRequestDto = {
       payload: 'deadbeef',
       privateKeys: ['00'.repeat(32)],
-      plan: buildResponse.plan,
     };
     const result = controller.sign(body);
     expect(service.sign).toHaveBeenCalledWith(body);

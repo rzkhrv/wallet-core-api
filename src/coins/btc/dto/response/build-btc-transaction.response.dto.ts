@@ -1,6 +1,76 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BtcTransactionPlanResponseDto } from './btc-transaction-plan.response.dto';
 
+export class BtcBuildTransactionUtxoResponseDto {
+  @ApiProperty({
+    example: 'e3c0f7b6a7c9d8e1f2a3b4c5d6e7f8090a1b2c3d4e5f60718293a4b5c6d7e8f9',
+    description: 'UTXO transaction id (txid)',
+  })
+  txid: string;
+
+  @ApiProperty({ example: 0, description: 'UTXO output index (vout)' })
+  vout: number;
+
+  @ApiProperty({
+    example: '10000',
+    description: 'UTXO amount in satoshis',
+  })
+  amount: string;
+
+  @ApiProperty({
+    example: 'ABTYPg==',
+    description: 'UTXO scriptPubKey (base64)',
+  })
+  scriptPubKey: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Reverse txid byte order when required',
+  })
+  reverseTxId: boolean;
+}
+
+export class BtcBuildTransactionIntentResponseDto {
+  @ApiProperty({
+    example: 'bc1qw4hrw0v2k0w8m7yr9q4r6v2x8e6jzndt3x8l2h',
+    description: 'Recipient BTC address',
+  })
+  toAddress: string;
+
+  @ApiProperty({
+    example: 'bc1q2l3m4n5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e',
+    description: 'Change BTC address',
+  })
+  changeAddress: string;
+
+  @ApiProperty({
+    example: '10000',
+    description: 'Amount to send in satoshis',
+  })
+  amount: string;
+
+  @ApiProperty({
+    example: '10',
+    description: 'Fee per byte in satoshis',
+  })
+  byteFee: string;
+
+  @ApiProperty({ type: [BtcBuildTransactionUtxoResponseDto] })
+  utxos: BtcBuildTransactionUtxoResponseDto[];
+
+  @ApiProperty({ example: 1, description: 'Resolved SIGHASH type' })
+  hashType: number;
+
+  @ApiProperty({
+    example: false,
+    description: 'Spend maximum available amount',
+  })
+  useMaxAmount: boolean;
+
+  @ApiProperty({ type: BtcTransactionPlanResponseDto })
+  plan: BtcTransactionPlanResponseDto;
+}
+
 export class BuildBtcTransactionResponseDto {
   @ApiProperty({
     example:
@@ -9,6 +79,6 @@ export class BuildBtcTransactionResponseDto {
   })
   payload: string;
 
-  @ApiProperty({ type: BtcTransactionPlanResponseDto })
-  plan: BtcTransactionPlanResponseDto;
+  @ApiProperty({ type: BtcBuildTransactionIntentResponseDto })
+  transaction: BtcBuildTransactionIntentResponseDto;
 }

@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsHash,
-  IsJSON,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -10,13 +9,14 @@ import {
 
 export class SignTronRawTransactionRequestDto {
   @ApiProperty({
-    example: '{"visible":true,"txID":"..."}',
-    description: 'Raw TRON transaction JSON (from Tron node)',
+    example:
+      '0x7b227472616e73666572223a7b226f776e657241646472657373223a222e2e2e227d7d',
+    description: 'Signing payload from build step (hex-encoded UTF-8 raw JSON)',
   })
-  @IsJSON()
+  @Matches(/^(0x)?([0-9a-fA-F]{2})+$/)
   @IsString()
   @IsNotEmpty()
-  rawJson: string;
+  payload: string;
 
   @ApiProperty({
     example: '6cddce8e6d38c6d2f5c9b2f1f2c9b8e4e5f6a7b8c9d0e1f2a3b4c5d6e7f8090',

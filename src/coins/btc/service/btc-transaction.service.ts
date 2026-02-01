@@ -25,7 +25,7 @@ export class BtcTransactionService implements CoinTransactionService<
   /**
    * Builds a BTC transaction payload.
    * @param request Request payload.
-   * @returns Unsigned transaction response.
+   * @returns Unsigned transaction response with payload and intent.
    */
   buildTransaction(
     request: BuildBtcTransactionRequestDto,
@@ -50,7 +50,10 @@ export class BtcTransactionService implements CoinTransactionService<
     const result: BtcBuildTransactionAdapterOutput =
       this.btcTransactionAdapter.buildTransaction(adapterRequest);
 
-    return result;
+    return {
+      payload: result.payload,
+      transaction: result.transaction,
+    };
   }
 
   /**

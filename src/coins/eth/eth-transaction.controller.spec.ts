@@ -17,9 +17,26 @@ describe('EthTransactionController', () => {
   };
   const buildResponse: BuildEthTransactionResponseDto = {
     payload: 'deadbeef',
+    transaction: {
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '1',
+      gasLimit: '21000',
+      toAddress: '0xabc',
+      amount: '1',
+    },
   };
   const transferResponse: BuildEthErc20TransferResponseDto = {
     payload: 'cafebabe',
+    transaction: {
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '1',
+      gasLimit: '60000',
+      toAddress: '0xabc',
+      tokenContract: '0xdef',
+      amount: '1',
+    },
   };
   const signResponse: SignEthTransactionResponseDto = {
     rawTx: 'raw',

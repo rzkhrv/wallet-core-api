@@ -49,7 +49,10 @@ export class EthTransactionService implements CoinTransactionService<
     const result: EthTransactionBuildAdapterOutput =
       this.ethTransactionAdapter.buildTransaction(adapterRequest);
 
-    return result;
+    return {
+      payload: result.payload,
+      transaction: result.transaction,
+    };
   }
 
   /**
@@ -74,7 +77,10 @@ export class EthTransactionService implements CoinTransactionService<
     const result: EthErc20TransferBuildAdapterOutput =
       this.ethTransactionAdapter.buildTransfer(adapterRequest);
 
-    return result;
+    return {
+      payload: result.payload,
+      transaction: result.transaction,
+    };
   }
 
   /**

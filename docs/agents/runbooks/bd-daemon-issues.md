@@ -14,10 +14,18 @@ Beads daemon startup is slow or auto-flush fails while updating issues.
    ```
 2. Inspect Beads logs:
    - `.beads/daemon.log`
-3. Verify repo permissions for Beads worktrees:
+3. If `bd ready --json` times out or you see `operation not permitted` for `~/.beads/registry.lock`, run in direct mode to unblock:
+   ```bash
+   bd ready --json --no-daemon
+   ```
+4. If write commands warn about auto-flush failures in `.git/beads-worktrees/`, retry with `--no-auto-flush` and fix permissions before syncing:
+   ```bash
+   bd update <id> --status in_progress --json --no-daemon --no-auto-flush
+   ```
+5. Verify repo permissions for Beads worktrees:
    - Ensure `.git/beads-worktrees/` exists and is writable by the current user.
-4. If permissions are wrong, fix ownership or ask for assistance before changing permissions.
-5. Retry a simple command:
+6. If permissions are wrong, fix ownership or ask for assistance before changing permissions.
+7. Retry a simple command:
    ```bash
    bd ready --json
    ```
@@ -30,4 +38,4 @@ Beads daemon startup is slow or auto-flush fails while updating issues.
 - `.beads/daemon.log`
 - `.beads/issues.jsonl`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-01

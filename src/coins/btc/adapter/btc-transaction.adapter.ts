@@ -6,7 +6,11 @@ import { AdapterError } from '../../../common/errors/adapter-error';
 import { WalletCoreAdapter } from '../../../common/wallet-core/wallet-core.adapter';
 import { CoinTransactionAdapter } from '../../../common/interfaces/coin-transaction-adapter.interface';
 import { BtcBuildTransactionAdapterInput } from './dto/btc-transaction-build-input.dto';
-import { BtcBuildTransactionAdapterOutput } from './dto/btc-transaction-build-output.dto';
+import {
+  BtcBuildTransactionAdapterOutput,
+  BtcBuildTransactionIntent,
+  BtcBuildTransactionUtxoIntent,
+} from './dto/btc-transaction-build-output.dto';
 import { BtcSignTransactionAdapterInput } from './dto/btc-transaction-sign-input.dto';
 import { BtcSignTransactionAdapterOutput } from './dto/btc-transaction-sign-output.dto';
 import Long from 'long';
@@ -24,9 +28,9 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
   constructor(private readonly walletCore: WalletCoreAdapter) {}
 
   /**
-   * Builds a BTC transaction payload and plan.
+   * Builds a BTC transaction payload and resolved transaction intent.
    * @param input Adapter request payload.
-   * @returns Build response with payload and plan.
+   * @returns Build response with payload and transaction intent.
    */
   buildTransaction(
     input: BtcBuildTransactionAdapterInput,
@@ -42,7 +46,7 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
 
       return {
         payload: this.encodeSigningInput(signingInput),
-        plan: this.toPlanResponse(plan),
+        transaction: this.resolveTransaction(signingInput, plan, input),
       };
     } catch (error: unknown) {
       if (error instanceof AdapterError) {
@@ -231,5 +235,91 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
       return normalized;
     }
     return normalized.length % 2 === 0 ? normalized : `0${normalized}`;
+  }
+
+  private resolveTransaction(
+    signingInput: TW.Bitcoin.Proto.SigningInput,
+    plan: TW.Bitcoin.Proto.TransactionPlan,
+    input: BtcBuildTransactionAdapterInput,
+  ): BtcBuildTransactionIntent {
+    return {
+      toAddress: this.requireString(signingInput.toAddress, 'toAddress'),
+      changeAddress: this.requireString(
+        signingInput.changeAddress,
+        'changeAddress',
+      ),
+      amount: this.toLongString(signingInput.amount),
+      byteFee: this.toLongString(signingInput.byteFee),
+      utxos: this.resolveUtxos(signingInput, input),
+      hashType: signingInput.hashType ?? 1,
+      useMaxAmount: signingInput.useMaxAmount ?? false,
+      plan: this.toPlanResponse(plan),
+    };
+  }
+
+  private resolveUtxos(
+    signingInput: TW.Bitcoin.Proto.SigningInput,
+    input: BtcBuildTransactionAdapterInput,
+  ): BtcBuildTransactionUtxoIntent[] {
+    const core = this.walletCore.getCore();
+    const utxos = signingInput.utxo ?? [];
+    if (utxos.length !== input.utxos.length) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INCOMPLETE',
+        'BTC signing input missing UTXO data',
+      );
+    }
+
+    return utxos.map((utxo, index) => {
+      const outPoint = utxo.outPoint;
+      if (!outPoint?.hash) {
+        throw new AdapterError(
+          'BTC_TRANSACTION_BUILD_INCOMPLETE',
+          'BTC signing input missing outpoint hash',
+        );
+      }
+
+      const reverseTxId = input.utxos[index]?.reverseTxId ?? true;
+      const hashBytes = new Uint8Array(outPoint.hash);
+      const displayHash = reverseTxId
+        ? Uint8Array.from(hashBytes).reverse()
+        : hashBytes;
+      const script = utxo.script;
+      if (!script) {
+        throw new AdapterError(
+          'BTC_TRANSACTION_BUILD_INCOMPLETE',
+          'BTC signing input missing scriptPubKey',
+        );
+      }
+
+      return {
+        txid: core.HexCoding.encode(displayHash),
+        vout: outPoint.index ?? 0,
+        amount: this.toLongString(utxo.amount),
+        scriptPubKey: Buffer.from(script).toString('base64'),
+        reverseTxId,
+      };
+    });
+  }
+
+  private toLongString(value: Long | number | null | undefined): string {
+    if (value === undefined || value === null) {
+      return '0';
+    }
+    if (typeof value === 'number') {
+      return String(value);
+    }
+    return value.toString();
+  }
+
+  private requireString(value: string | undefined, field: string): string {
+    if (!value) {
+      throw new AdapterError(
+        'BTC_TRANSACTION_BUILD_INCOMPLETE',
+        `BTC signing input missing ${field}`,
+        { field },
+      );
+    }
+    return value;
   }
 }

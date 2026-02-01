@@ -22,6 +22,5 @@ describe('AppController', () => {
       expect(result.service).toBe('wallet-core-api');
       expect(result.timestamp).toBeDefined();
     });
-
   });
 });

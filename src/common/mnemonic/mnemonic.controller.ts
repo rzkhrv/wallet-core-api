@@ -45,5 +45,4 @@ export class MnemonicController {
   ): ValidateMnemonicResponseDto {
     return this.mnemonicService.validate(body);
   }
-
 }

@@ -45,5 +45,4 @@ export class TronAddressController {
   ): ValidateTronAddressResponseDto {
     return this.tronAddressService.validate(body);
   }
-
 }

@@ -52,6 +52,15 @@ describe('ETH transaction signing', () => {
     });
 
     expect(result.payload).toBeDefined();
+    expect(result.transaction).toEqual({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '60000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amount: '1000000',
+    });
   });
 
   it('signs ERC20 transfer (adapter)', () => {
@@ -88,6 +97,14 @@ describe('ETH transaction signing', () => {
     });
 
     expect(result.payload).toBeDefined();
+    expect(result.transaction).toEqual({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '1000000000000000',
+    });
   });
 
   it('parses decimal and hex amounts in build payload (adapter)', () => {
@@ -150,6 +167,15 @@ describe('ETH transaction signing', () => {
     });
 
     expect(result.payload).toBeDefined();
+    expect(result.transaction).toEqual({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '60000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      tokenContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amount: '1000000',
+    });
   });
 
   it('builds ETH transaction (service)', () => {
@@ -159,10 +185,18 @@ describe('ETH transaction signing', () => {
       gasPrice: '20000000000',
       gasLimit: '21000',
       toAddress: '0x1111111111111111111111111111111111111111',
-      amount: '1000000000000000',
+      amount: '0x10',
     });
 
     expect(result.payload).toBeDefined();
+    expect(result.transaction).toEqual({
+      chainId: '1',
+      nonce: '0',
+      gasPrice: '20000000000',
+      gasLimit: '21000',
+      toAddress: '0x1111111111111111111111111111111111111111',
+      amount: '16',
+    });
   });
 
   it('signs ERC20 transfer (service)', () => {
