@@ -15,9 +15,11 @@ This document is the mandatory workflow for any agent working in this repo. It c
 
 ## Definition of Done (DoD) per task
 - Run format: `npm run format`.
+- Run lint: `npm run lint`.
 - Run tests (full suite):
   - `npm run test`
   - `npm run test:e2e`
+- Run build/typecheck: `npm run build`.
 - All new/changed endpoints must have automated tests (see below).
 
 If a test cannot run due to missing environment or data, log that in the BD task description and create a follow-up task with the blocker.

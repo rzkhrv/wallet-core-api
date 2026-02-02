@@ -19,6 +19,7 @@ This file documents how to add a new coin safely and consistently. For overall a
 - Address controller + service implemented and wired to adapter.
 - Transaction controller + service implemented and wired to adapter (or explicitly not supported with documented rationale).
 - Request/response DTOs added for all endpoints.
+- Transaction adapters follow the proto-first pattern (no manual encoding); see `docs/agents/patterns/proto-first-transactions.md`.
 - Tests:
   - Unit/integration specs in `src/coins/<coin>/**/*.spec.ts`.
   - E2E coverage in `test/*.e2e-spec.ts`.
@@ -83,6 +84,7 @@ src/
 3. Add adapters:
    - Create `src/coins/<coin>/adapter/` with address and transaction adapters.
    - Add adapter DTOs under `src/coins/<coin>/adapter/dto/` (use Input/Output naming).
+   - Build/sign transactions via wallet-core proto messages and `AnySigner` (see proto-first pattern).
    - Wrap wallet-core errors with `AdapterError`.
    - Ensure all wallet-core WASM objects are `.delete()`-d in `finally`.
 4. Add API layer:

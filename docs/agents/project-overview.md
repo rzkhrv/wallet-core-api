@@ -1,35 +1,27 @@
 # Project overview
 
 ## Context
-For agents working on the Wallet Core API (NestJS service wrapping `@trustwallet/wallet-core`).
+Agent-facing delta for the Wallet Core API. This file intentionally stays short to avoid duplicating `docs/PROJECT.md`.
 
-## Goal
-Understand what the service does, where the main entry points live, and how requests flow through adapters.
+## Canonical references (source of truth)
+- Architecture/runtime: `docs/PROJECT.md`
+- Workflow/DoD: `docs/WORKFLOW.md`
+- Coin onboarding: `docs/COINS.md`
+- Coding conventions: `docs/coding-rules.md`
+- Transaction rules: `docs/agents/patterns/proto-first-transactions.md`
+- Doc index: `docs/README.md`
 
-## Summary
-- Service: REST API for mnemonic, address, and transaction operations.
-- Stack: Node.js + NestJS + TypeScript + `@trustwallet/wallet-core` WASM.
-- Request flow: Controller → Service → Adapter → wallet-core (coin adapters live under `src/coins/<coin>/adapter/`).
-- Errors normalized by `ApiExceptionFilter` into `{ error: { code, message, details } }`.
-- Swagger UI served at `/api`.
-- POST endpoints return HTTP 201; Swagger responses use 201 to match runtime defaults.
-- TRON transactions: `build-transaction` for TRX, `build-transfer` for TRC20.
-- TRON build inputs accept optional `timestamp`/`expiration` (service defaults to now/now+60s) and accept decimal-only numerics; `blockId` is 32-byte hex.
-- Build transaction endpoints return `{ payload, transaction }` where `transaction` is derived from built artifacts (ETH/BTC decode signing input, TRON TRC20 decodes `triggerSmartContract.data`).
-- TRON payloads are hex-encoded UTF-8 raw JSON; TRON sign expects the hex payload and decodes to rawJson before wallet-core signing.
-- Wallet-core TRON signing with `SigningInput.rawJson` returns an empty `SigningOutput.json`, so the adapter builds signed JSON + `raw_data_hex` manually and may re-sign to inject `ref_block_bytes`/`ref_block_hash`.
-- BTC build supports multiple outputs via `extraOutputs`; request supplies outputs list with exactly one change output, which is returned in transaction outputs with plan-derived change amount.
-- BTC build expects UTXO txids in standard display order (big-endian hex), reverses bytes for wallet-core, and uses fixed hashType `1` (SIGHASH_ALL) surfaced only in build responses.
-- Documentation lookup: always check MCP Context7 first for NestJS, TypeScript, wallet-core, and crypto references.
+## Agent-specific notes (delta)
+- If content here conflicts with canonical docs above, prefer the canonical docs.
+- Transaction work must follow the proto-first pattern; link decisions or patterns instead of re-stating rules.
 
 ## Steps
-1. Read `docs/PROJECT.md` for architecture and conventions.
-2. Skim `src/main.ts` and `src/app.module.ts` to see bootstrap and module wiring.
-3. Review `src/coins/` and `src/common/wallet-core/` to understand coin-specific APIs and shared wallet-core wrappers.
+1. Start with `docs/README.md` to pick the canonical doc for your task.
+2. Use `docs/PROJECT.md` to understand architecture and request flow.
+3. Use the patterns/workflows docs for implementation specifics.
 
 ## Verification
-- You can point to the main entry file (`src/main.ts`) and the module aggregator (`src/app.module.ts`).
-- You can describe the request flow and error shape.
+- You can name which document is canonical for your task.
 
 ## References
 - `docs/PROJECT.md`

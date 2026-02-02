@@ -1,10 +1,10 @@
 # Workflow: how to use bd (beads)
 
 ## Context
-Required task tracking workflow for this repo.
+Step-by-step bd usage. The canonical rules live in `docs/WORKFLOW.md`.
 
 ## Goal
-Track all work in Beads with clear dependencies and auditability.
+Provide concrete bd commands; if this file conflicts with `docs/WORKFLOW.md`, follow `docs/WORKFLOW.md`.
 
 ## Steps
 1. Find ready work:

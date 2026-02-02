@@ -1,34 +1,21 @@
 # Troubleshooting
 
 ## Context
-Common issues and where to find the fix steps.
+Common issues and where to find the canonical fix steps.
 
-## Symptoms
-- `bd` commands are slow or show auto-flush permission errors.
-- Server starts on a different port than expected.
-- wallet-core WASM fails to initialize.
-- E2E tests fail on first run.
-- Validation errors look different than expected.
-- TRC20 build fails with `TRON address payload is invalid` (TRON `AnyAddress.data()` can be empty).
-- Address generation returns 500/`INTERNAL_ERROR` when mnemonic is invalid.
-- BTC build returns a payload but signing fails due to an unhandled plan error.
-- TRON broadcast fails with `TAPOS_ERROR`.
-- TRON broadcast fails with `SIGERROR` after signing.
-
-## Steps
-1. For bd daemon startup or auto-flush errors, use the bd runbook.
-2. For port mismatches, verify `src/main.ts` and `PORT` env.
-3. For wallet-core init errors, check the wallet-core runbook.
-4. For e2e test failures, follow the e2e setup runbook.
-5. For TRC20 build failures, handle `AnyAddress.data()` length 0 by decoding base58 and accept 20/21 bytes.
-6. For mnemonic-related 500s, validate mnemonics before wallet creation and wrap wallet creation in adapter try/catch.
-7. For BTC build/sign mismatches, check `TransactionPlan.error` from `AnySigner.plan` and fail fast when non-OK.
-8. For TRON `TAPOS_ERROR`, require `blockId` (32-byte hex) and `blockNumber` (decimal), then derive `ref_block_bytes`/`ref_block_hash` into the payload.
-9. For TRON `SIGERROR`, ensure the signed response includes `raw_data_hex` and broadcast with `visible: false` (hex addresses). Compute `txID` from `raw_data_hex` (SHA-256) before signing; wallet-core uses provided `txID` as-is.
+## Symptom index (start here)
+- `bd` commands are slow or show auto-flush permission errors → `docs/agents/runbooks/bd-daemon-issues.md`.
+- Server starts on a different port than expected → `docs/agents/runbooks/port-mismatch.md`.
+- wallet-core WASM fails to initialize → `docs/agents/runbooks/wallet-core-init.md`.
+- E2E tests fail on first run → `docs/agents/runbooks/e2e-test-setup.md`.
+- Validation errors look different than expected → `src/common/errors/api-exception.filter.ts` and `docs/PROJECT.md`.
+- TRC20 build fails with `TRON address payload is invalid` → `src/coins/tron/adapter/tron-address.adapter.ts` and related DTO validation in `src/coins/tron/dto/request/`.
+- Address generation returns 500/`INTERNAL_ERROR` when mnemonic is invalid → `src/common/mnemonic/` and adapter error handling.
+- BTC build returns a payload but signing fails → `src/coins/btc/adapter/btc-transaction.adapter.ts` (plan errors) and `docs/agents/patterns/proto-first-transactions.md`.
+- TRON broadcast fails with `TAPOS_ERROR` or `SIGERROR` → `src/coins/tron/adapter/tron-transaction.adapter.ts` and `docs/agents/decisions/0002-tron-proto-first-signing.md`.
 
 ## Verification
-- You can start the service and hit `GET /`.
-- `npm run test:e2e` passes (or failures are explained and tracked in bd).
+- You can find the runbook or source-of-truth link for the symptom.
 
 ## References
 - `docs/agents/runbooks/bd-daemon-issues.md`

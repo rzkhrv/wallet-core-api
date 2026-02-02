@@ -1,10 +1,10 @@
 # Quality gates
 
 ## Context
-Required checks before considering work done.
+Convenience checklist for running the repo checks. The canonical DoD lives in `docs/WORKFLOW.md`.
 
 ## Goal
-Keep formatting and tests consistent with repo rules.
+Provide a quick command list; if this file conflicts with `docs/WORKFLOW.md`, follow `docs/WORKFLOW.md`.
 
 ## Steps
 1. Format:
