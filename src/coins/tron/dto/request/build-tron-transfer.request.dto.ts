@@ -1,15 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBase58,
+  IsDefined,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   Matches,
+  ValidateNested,
 } from 'class-validator';
+import { TronBlockHeaderRequestDto } from './tron-block-header.request.dto';
 
 const DECIMAL_STRING_REGEX = /^[0-9]+$/;
-const BLOCK_ID_REGEX = /^[0-9a-fA-F]{64}$/;
 
 export class BuildTronTransferRequestDto {
   @ApiProperty({
@@ -44,22 +47,13 @@ export class BuildTronTransferRequestDto {
   amount: string;
 
   @ApiProperty({
-    example: '0000000000000001f3a1b2c3d4e5f60708090a0b0c0d0e0f1011121314151617',
-    description: 'Block ID (hex, 32 bytes)',
+    type: TronBlockHeaderRequestDto,
+    description: 'Block header fields for TAPOS-safe ref_block_hash derivation',
   })
-  @Matches(BLOCK_ID_REGEX)
-  @IsString()
-  @IsNotEmpty()
-  blockId: string;
-
-  @ApiProperty({
-    example: '1234567',
-    description: 'Block number (decimal)',
-  })
-  @Matches(DECIMAL_STRING_REGEX)
-  @IsString()
-  @IsNotEmpty()
-  blockNumber: string;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => TronBlockHeaderRequestDto)
+  blockHeader: TronBlockHeaderRequestDto;
 
   @ApiProperty({
     example: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',

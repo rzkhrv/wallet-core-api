@@ -3,14 +3,19 @@ import { BuildTronTransferRequestDto } from './build-tron-transfer.request.dto';
 
 describe('BuildTronTransferRequestDto', () => {
   const validAddress: string = `T${'1'.repeat(33)}`;
-  const validBlockId: string = '11'.repeat(32);
-  const validBlockNumber: string = '1';
+  const validBlockHeader = {
+    number: '1',
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: '1738253400000',
+  };
   it('rejects invalid contract address for trc20', () => {
     const dto: BuildTronTransferRequestDto = new BuildTronTransferRequestDto();
     dto.ownerAddress = validAddress;
     dto.toAddress = validAddress;
-    dto.blockId = validBlockId;
-    dto.blockNumber = validBlockNumber;
+    dto.blockHeader = validBlockHeader;
     dto.timestamp = '1';
     dto.expiration = '2';
     dto.contractAddress = 'invalid';
@@ -30,13 +35,9 @@ describe('BuildTronTransferRequestDto', () => {
     dto.timestamp = '1';
     dto.expiration = '2';
     const errors: ValidationError[] = validateSync(dto);
-    const hasBlockIdError: boolean = errors.some(
-      (error: ValidationError) => error.property === 'blockId',
+    const hasBlockHeaderError: boolean = errors.some(
+      (error: ValidationError) => error.property === 'blockHeader',
     );
-    const hasBlockNumberError: boolean = errors.some(
-      (error: ValidationError) => error.property === 'blockNumber',
-    );
-    expect(hasBlockIdError).toBe(true);
-    expect(hasBlockNumberError).toBe(true);
+    expect(hasBlockHeaderError).toBe(true);
   });
 });

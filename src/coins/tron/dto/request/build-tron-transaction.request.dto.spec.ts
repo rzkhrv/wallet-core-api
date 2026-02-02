@@ -3,16 +3,21 @@ import { BuildTronTransactionRequestDto } from './build-tron-transaction.request
 
 describe('BuildTronTransactionRequestDto', () => {
   const validAddress: string = `T${'1'.repeat(33)}`;
-  const validBlockId: string = '11'.repeat(32);
-  const validBlockNumber: string = '1';
+  const validBlockHeader = {
+    number: '1',
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: '1738253400000',
+  };
   it('rejects invalid owner address', () => {
     const dto: BuildTronTransactionRequestDto =
       new BuildTronTransactionRequestDto();
     dto.ownerAddress = 'invalid';
     dto.toAddress = validAddress;
     dto.amount = '1';
-    dto.blockId = validBlockId;
-    dto.blockNumber = validBlockNumber;
+    dto.blockHeader = validBlockHeader;
     dto.timestamp = '1';
     dto.expiration = '2';
     const errors: ValidationError[] = validateSync(dto);
@@ -28,18 +33,12 @@ describe('BuildTronTransactionRequestDto', () => {
     dto.ownerAddress = validAddress;
     dto.toAddress = validAddress;
     dto.amount = '1';
-    dto.blockId = '';
-    dto.blockNumber = '';
     dto.timestamp = '1';
     dto.expiration = '2';
     const errors: ValidationError[] = validateSync(dto);
-    const hasBlockIdError: boolean = errors.some(
-      (error: ValidationError) => error.property === 'blockId',
+    const hasBlockHeaderError: boolean = errors.some(
+      (error: ValidationError) => error.property === 'blockHeader',
     );
-    const hasBlockNumberError: boolean = errors.some(
-      (error: ValidationError) => error.property === 'blockNumber',
-    );
-    expect(hasBlockIdError).toBe(true);
-    expect(hasBlockNumberError).toBe(true);
+    expect(hasBlockHeaderError).toBe(true);
   });
 });

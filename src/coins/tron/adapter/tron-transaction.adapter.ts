@@ -10,6 +10,7 @@ import {
   TronTransactionBuildAdapterOutput,
   TronTransactionIntent,
 } from './dto/tron-transaction-build-output.dto';
+import type { TronBlockHeaderInput } from './dto/tron-block-header-input.dto';
 import { TronTransferBuildAdapterInput } from './dto/tron-transfer-build-input.dto';
 import { TronTransactionSignAdapterInput } from './dto/tron-transaction-sign-input.dto';
 import { TronTransactionSignAdapterOutput } from './dto/tron-transaction-sign-output.dto';
@@ -167,15 +168,14 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
   private createBaseTransaction(input: {
     timestamp: string;
     expiration: string;
-    blockId: string;
-    blockNumber: string;
+    blockHeader: TronBlockHeaderInput;
     feeLimit?: string;
     memo?: string;
   }): Partial<TW.Tron.Proto.ITransaction> {
     const baseTransaction: Partial<TW.Tron.Proto.ITransaction> = {
       timestamp: this.toLong(input.timestamp),
       expiration: this.toLong(input.expiration),
-      blockHeader: this.createBlockHeader(input.blockId, input.blockNumber),
+      blockHeader: this.createBlockHeader(input.blockHeader),
     };
     if (input.feeLimit) {
       baseTransaction.feeLimit = this.toLong(input.feeLimit);
@@ -187,13 +187,22 @@ export class TronTransactionAdapter implements CoinTransactionAdapter<
   }
 
   private createBlockHeader(
-    blockId: string,
-    blockNumber: string,
+    blockHeader: TronBlockHeaderInput,
   ): TW.Tron.Proto.BlockHeader {
     const core = this.walletCore.getCore();
     return TW.Tron.Proto.BlockHeader.create({
-      number: this.toLong(blockNumber),
-      parentHash: core.HexCoding.decode(this.normalizeHexBytes(blockId)),
+      number: this.toLong(blockHeader.number),
+      timestamp: this.toLong(blockHeader.timestamp),
+      txTrieRoot: core.HexCoding.decode(
+        this.normalizeHexBytes(blockHeader.txTrieRoot),
+      ),
+      parentHash: core.HexCoding.decode(
+        this.normalizeHexBytes(blockHeader.parentHash),
+      ),
+      witnessAddress: core.HexCoding.decode(
+        this.normalizeHexBytes(blockHeader.witnessAddress),
+      ),
+      version: Number.parseInt(blockHeader.version, 10),
     });
   }
 

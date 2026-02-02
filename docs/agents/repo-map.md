@@ -24,6 +24,7 @@ Let an agent find the right place to make changes without guessing.
 - Docs: `docs/PROJECT.md`, `docs/COINS.md`, `docs/WORKFLOW.md`
 - Generated: `dist/` (do not edit), `node_modules/` (do not edit)
 - Task tracking: `.beads/`
+- Task plans: `tasks/` (`{index}-task.md`, content in Russian, approval block uses `Одобрено: Да`)
 
 ## Verification
 - You can locate the controller/service/adapter for an existing coin (e.g., BTC).
@@ -35,4 +36,4 @@ Let an agent find the right place to make changes without guessing.
 - `docs/`
 - `.beads/`
 
-Last updated: 2026-02-01
+Last updated: 2026-02-02

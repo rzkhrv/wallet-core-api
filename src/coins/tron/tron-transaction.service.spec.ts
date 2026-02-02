@@ -24,6 +24,14 @@ describe('TRON transaction service', () => {
     signedJson: '{}',
     visible: false,
   };
+  const blockHeader = {
+    number: '1',
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: '1738253400000',
+  };
 
   const makeService = () => {
     const adapter: {
@@ -49,8 +57,7 @@ describe('TRON transaction service', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
+      blockHeader,
     });
     expect(result).toEqual(adapterBuildResponse);
     expect(adapter.buildTransaction).toHaveBeenCalledWith(
@@ -58,8 +65,7 @@ describe('TRON transaction service', () => {
         ownerAddress: 'TXYZ',
         toAddress: 'TABC',
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader,
       }),
     );
     const buildCalls = adapter.buildTransaction.mock.calls as Array<
@@ -77,8 +83,7 @@ describe('TRON transaction service', () => {
       toAddress: 'TABC',
       contractAddress: 'TCONTRACT',
       amount: '100',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
+      blockHeader,
       callValue: '0',
       feeLimit: '10000000',
     });
@@ -88,8 +93,7 @@ describe('TRON transaction service', () => {
         contractAddress: 'TCONTRACT',
         callValue: '0',
         feeLimit: '10000000',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader,
       }),
     );
     const transferCalls = adapter.buildTransfer.mock.calls as Array<
@@ -107,8 +111,7 @@ describe('TRON transaction service', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
+      blockHeader,
     });
     expect(adapter.buildTransaction).toHaveBeenCalledWith(
       expect.objectContaining({

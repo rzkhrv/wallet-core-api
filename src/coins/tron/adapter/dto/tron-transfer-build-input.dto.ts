@@ -1,12 +1,13 @@
 /**
  * Adapter input payload for TRON token transfer building.
  */
+import type { TronBlockHeaderInput } from './tron-block-header-input.dto';
+
 export interface TronTransferBuildAdapterInput {
   ownerAddress: string;
   toAddress: string;
   amount: string;
-  blockId: string;
-  blockNumber: string;
+  blockHeader: TronBlockHeaderInput;
   contractAddress: string;
   callValue?: string;
   timestamp: string;

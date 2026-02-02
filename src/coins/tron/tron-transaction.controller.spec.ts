@@ -36,6 +36,14 @@ describe('TronTransactionController', () => {
     signedJson: '{}',
     visible: false,
   };
+  const blockHeader = {
+    number: '1',
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: '1738253400000',
+  };
   beforeEach(async () => {
     service = {
       buildTransaction: jest.fn().mockReturnValue(buildResponse),
@@ -62,8 +70,7 @@ describe('TronTransactionController', () => {
       toAddress: 'TABC',
       contractAddress: 'TCONTRACT',
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
+      blockHeader,
       timestamp: '1000',
       expiration: '2000',
       feeLimit: '10000000',
@@ -79,8 +86,7 @@ describe('TronTransactionController', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
+      blockHeader,
       timestamp: '1000',
       expiration: '2000',
     };

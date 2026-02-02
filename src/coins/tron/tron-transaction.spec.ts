@@ -25,6 +25,15 @@ describe('TRON transaction build/signing', () => {
     return BigInt(`0x${safeHex}`).toString(10);
   };
 
+  const makeBlockHeader = (number: string) => ({
+    number,
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: `${Date.now()}`,
+  });
+
   beforeAll(async () => {
     walletCore = new WalletCoreAdapter();
     await walletCore.onModuleInit();
@@ -36,16 +45,14 @@ describe('TRON transaction build/signing', () => {
     const wallet = core.HDWallet.create(128, '');
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const blockId = '11'.repeat(32);
-    const blockNumber = '4660';
+    const blockHeader = makeBlockHeader('4660');
 
     const now = Date.now();
     const result = transactionAdapter.buildTransaction({
       ownerAddress,
       toAddress: recipientAddress,
       amount: '1',
-      blockId,
-      blockNumber,
+      blockHeader,
       timestamp: `${now}`,
       expiration: `${now + 60_000}`,
     });
@@ -60,7 +67,7 @@ describe('TRON transaction build/signing', () => {
     expect(signingInput.transaction?.transfer).toBeDefined();
     expect(signingInput.transaction?.blockHeader).toBeDefined();
     expect(signingInput.transaction?.blockHeader?.number?.toString()).toBe(
-      Long.fromString(blockNumber).toString(),
+      Long.fromString(blockHeader.number).toString(),
     );
 
     wallet.delete();
@@ -72,8 +79,7 @@ describe('TRON transaction build/signing', () => {
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const blockId = '11'.repeat(32);
-    const blockNumber = '4660';
+    const blockHeader = makeBlockHeader('4660');
     const timestamp = `${Date.now()}`;
     const expiration = `${Date.now() + 60_000}`;
 
@@ -82,8 +88,7 @@ describe('TRON transaction build/signing', () => {
       toAddress: recipientAddress,
       contractAddress,
       amount: '1',
-      blockId,
-      blockNumber,
+      blockHeader,
       timestamp,
       expiration,
       feeLimit: '10000000',
@@ -115,6 +120,7 @@ describe('TRON transaction build/signing', () => {
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
+    const blockHeader = makeBlockHeader('4660');
 
     expect(() =>
       transactionAdapter.buildTransfer({
@@ -122,8 +128,7 @@ describe('TRON transaction build/signing', () => {
         toAddress: recipientAddress,
         contractAddress,
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '4660',
+        blockHeader,
         timestamp: `${Date.now()}`,
         expiration: `${Date.now() + 60_000}`,
         feeLimit: '10000000',
@@ -142,13 +147,13 @@ describe('TRON transaction build/signing', () => {
     const privateKey = core.HexCoding.encode(
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
+    const blockHeader = makeBlockHeader('4660');
 
     const build = transactionAdapter.buildTransaction({
       ownerAddress,
       toAddress: recipientAddress,
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '4660',
+      blockHeader,
       timestamp: `${Date.now()}`,
       expiration: `${Date.now() + 60_000}`,
     });
@@ -178,14 +183,14 @@ describe('TRON transaction build/signing', () => {
     const privateKey = core.HexCoding.encode(
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
+    const blockHeader = makeBlockHeader('4660');
 
     const build = transactionAdapter.buildTransfer({
       ownerAddress,
       toAddress: recipientAddress,
       contractAddress,
       amount: '1',
-      blockId: '11'.repeat(32),
-      blockNumber: '4660',
+      blockHeader,
       timestamp: `${Date.now()}`,
       expiration: `${Date.now() + 60_000}`,
       feeLimit: '10000000',
