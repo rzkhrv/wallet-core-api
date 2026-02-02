@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
 import { MnemonicStrength } from '../../enum/mnemonic-strength.enum';
+
+const MNEMONIC_STRENGTH_VALUES: MnemonicStrength[] = Object.values(
+  MnemonicStrength,
+).filter((value): value is MnemonicStrength => typeof value === 'number');
 
 export class GenerateMnemonicRequestDto {
   @ApiProperty({
@@ -8,7 +12,8 @@ export class GenerateMnemonicRequestDto {
     example: MnemonicStrength.Bits128,
     description: 'Mnemonic strength in bits',
   })
-  @IsEnum(MnemonicStrength)
+  @IsInt()
+  @IsIn(MNEMONIC_STRENGTH_VALUES)
   strength: MnemonicStrength;
 
   @ApiPropertyOptional({

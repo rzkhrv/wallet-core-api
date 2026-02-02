@@ -11,6 +11,7 @@ import { TronAddressValidateAdapterOutput } from './dto/tron-address-validate-ou
 
 type AnyAddressInstance = InstanceType<WalletCore['AnyAddress']>;
 type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
+type HDWalletInstance = InstanceType<WalletCore['HDWallet']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
@@ -41,13 +42,19 @@ export class TronAddressAdapter implements CoinAddressAdapter<
     let derivationPath: DerivationPathInstance | null = null;
     let privateKey: PrivateKeyInstance | null = null;
     let publicKey: PublicKeyInstance | null = null;
-
-    const wallet = this.walletCore.createHDWalletWithMnemonic(
-      input.mnemonic.value,
-      passphrase,
-    );
+    let wallet: HDWalletInstance | null = null;
 
     try {
+      if (!this.walletCore.isMnemonicValid(input.mnemonic.value)) {
+        throw new AdapterError(
+          'TRON_MNEMONIC_INVALID',
+          'TRON mnemonic is invalid',
+        );
+      }
+      wallet = this.walletCore.createHDWalletWithMnemonic(
+        input.mnemonic.value,
+        passphrase,
+      );
       derivationPath = core.DerivationPath.create(
         purpose,
         slip44,
@@ -55,12 +62,10 @@ export class TronAddressAdapter implements CoinAddressAdapter<
         input.derivation.change,
         input.derivation.index,
       );
-
       const path = derivationPath.description();
       privateKey = wallet.getKey(coinType, path);
       publicKey = privateKey.getPublicKey(coinType);
       address = core.AnyAddress.createWithPublicKey(publicKey, coinType);
-
       return {
         address: address.description(),
         keys: {
@@ -77,6 +82,9 @@ export class TronAddressAdapter implements CoinAddressAdapter<
         },
       };
     } catch (error: unknown) {
+      if (error instanceof AdapterError) {
+        throw error;
+      }
       const cause = error instanceof Error ? error.message : String(error);
       throw new AdapterError(
         'TRON_ADDRESS_GENERATION_FAILED',
@@ -90,7 +98,7 @@ export class TronAddressAdapter implements CoinAddressAdapter<
       publicKey?.delete();
       privateKey?.delete();
       derivationPath?.delete();
-      wallet.delete();
+      wallet?.delete();
     }
   }
 

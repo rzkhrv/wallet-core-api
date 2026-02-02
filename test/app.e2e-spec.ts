@@ -121,6 +121,15 @@ describe('Wallet Core API (e2e)', () => {
     mnemonic = body.mnemonic;
   });
 
+  it('POST /api/v1/mnemonic/generate rejects enum key strength', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/mnemonic/generate')
+      .send({ strength: 'Bits128' })
+      .expect(400);
+    const body = response.body as { error?: { code?: string } };
+    expect(body.error?.code).toBe('VALIDATION_ERROR');
+  });
+
   it('POST /api/v1/mnemonic/validate', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/mnemonic/validate')
@@ -146,6 +155,18 @@ describe('Wallet Core API (e2e)', () => {
     expect(body.keys?.private).toBeDefined();
     btcAddress = body.address;
     btcPrivateKey = body.keys.private;
+  });
+
+  it('POST /api/v1/address/btc/generate rejects invalid mnemonic', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/address/btc/generate')
+      .send({
+        mnemonic: { value: 'invalid mnemonic', passphrase: '' },
+        derivation: { account: 0, change: false, index: 0 },
+      })
+      .expect(400);
+    const body = response.body as { error?: { code?: string } };
+    expect(body.error?.code).toBe('BTC_MNEMONIC_INVALID');
   });
 
   it('POST /api/v1/address/btc/validate', async () => {
@@ -175,6 +196,18 @@ describe('Wallet Core API (e2e)', () => {
     ethPrivateKey = body.keys.private;
   });
 
+  it('POST /api/v1/address/eth/generate rejects invalid mnemonic', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/address/eth/generate')
+      .send({
+        mnemonic: { value: 'invalid mnemonic', passphrase: '' },
+        derivation: { account: 0, change: false, index: 0 },
+      })
+      .expect(400);
+    const body = response.body as { error?: { code?: string } };
+    expect(body.error?.code).toBe('ETH_MNEMONIC_INVALID');
+  });
+
   it('POST /api/v1/address/eth/validate', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/address/eth/validate')
@@ -200,6 +233,18 @@ describe('Wallet Core API (e2e)', () => {
     expect(body.keys?.private).toBeDefined();
     tronAddress = body.address;
     tronPrivateKey = body.keys.private;
+  });
+
+  it('POST /api/v1/address/tron/generate rejects invalid mnemonic', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/address/tron/generate')
+      .send({
+        mnemonic: { value: 'invalid mnemonic', passphrase: '' },
+        derivation: { account: 0, change: false, index: 0 },
+      })
+      .expect(400);
+    const body = response.body as { error?: { code?: string } };
+    expect(body.error?.code).toBe('TRON_MNEMONIC_INVALID');
   });
 
   it('POST /api/v1/address/tron/validate', async () => {
@@ -374,6 +419,40 @@ describe('Wallet Core API (e2e)', () => {
     expect(btcSignBody.rawTx).toBeDefined();
     expect(btcSignBody.txId).toBeDefined();
     expect(btcSignBody.plan?.amount).toBe('1000');
+  });
+
+  it('POST /api/v1/transaction/btc/build-transaction rejects insufficient funds', async () => {
+    const core = walletCore.getCore();
+    const { coinType } = resolveBtcWalletCoreConfig(core);
+    const script = core.BitcoinScript.lockScriptForAddress(
+      btcAddress,
+      coinType,
+    );
+    const encodedScript = core.HexCoding.encode(script.data());
+    const scriptPubKey = encodedScript.startsWith('0x')
+      ? encodedScript.slice(2)
+      : encodedScript;
+    script.delete();
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/transaction/btc/build-transaction')
+      .send({
+        outputs: [
+          { address: btcAddress, amount: '1000' },
+          { address: btcAddress, isChange: true },
+        ],
+        byteFee: '1',
+        utxos: [
+          {
+            txid: 'c'.repeat(64),
+            vout: 0,
+            amount: '1',
+            scriptPubKey,
+          },
+        ],
+      })
+      .expect(400);
+    const body = response.body as { error?: { code?: string } };
+    expect(body.error?.code).toBe('BTC_TRANSACTION_PLAN_FAILED');
   });
 
   it('POST /api/v1/transaction/eth/build-transaction', async () => {

@@ -3,6 +3,7 @@ import { BtcTransactionAdapter } from './adapter/btc-transaction.adapter';
 import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
 import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { resolveBtcWalletCoreConfig } from './btc-wallet-core.config';
+import { AdapterError } from '../../common/errors/adapter-error';
 
 describe('BTC transaction signing', () => {
   let walletCore: WalletCoreAdapter;
@@ -82,5 +83,45 @@ describe('BTC transaction signing', () => {
     expect(signResult.rawTx).toBeDefined();
     expect(signResult.txId).toBeDefined();
     expect(signResult.plan.amount).toBe('1000');
+  });
+
+  it('throws when transaction plan fails', () => {
+    const mnemonic = mnemonicAdapter.generate({
+      strength: 128,
+      passphrase: '',
+    });
+    const utxoAddress = addressAdapter.generate({
+      mnemonic: { value: mnemonic.mnemonic, passphrase: '' },
+      derivation: { account: 0, change: 0, index: 0 },
+    });
+    const recipientAddress = addressAdapter.generate({
+      mnemonic: { value: mnemonic.mnemonic, passphrase: '' },
+      derivation: { account: 0, change: 0, index: 1 },
+    });
+    const core = walletCore.getCore();
+    const { coinType } = resolveBtcWalletCoreConfig(core);
+    const script = core.BitcoinScript.lockScriptForAddress(
+      utxoAddress.address,
+      coinType,
+    );
+    const scriptPubKey = core.HexCoding.encode(script.data());
+    script.delete();
+    expect(() =>
+      transactionAdapter.buildTransaction({
+        outputs: [
+          { address: recipientAddress.address, amount: '1000' },
+          { address: utxoAddress.address, isChange: true },
+        ],
+        byteFee: '1',
+        utxos: [
+          {
+            txid: 'b'.repeat(64),
+            vout: 0,
+            amount: '1',
+            scriptPubKey,
+          },
+        ],
+      }),
+    ).toThrow(AdapterError);
   });
 });

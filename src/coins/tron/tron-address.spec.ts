@@ -2,6 +2,7 @@ import { TronAddressAdapter } from './adapter/tron-address.adapter';
 import { MnemonicAdapter } from '../../common/mnemonic/adapter/mnemonic.adapter';
 import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { TronAddressService } from './service/tron-address.service';
+import { AdapterError } from '../../common/errors/adapter-error';
 
 describe('TRON address flows', () => {
   let walletCore: WalletCoreAdapter;
@@ -49,5 +50,14 @@ describe('TRON address flows', () => {
 
     const validation = addressService.validate({ address: result.address });
     expect(validation.isValid).toBe(true);
+  });
+
+  it('throws on invalid mnemonic (adapter)', () => {
+    expect(() =>
+      addressAdapter.generate({
+        mnemonic: { value: 'invalid mnemonic', passphrase: '' },
+        derivation: { account: 0, change: 0, index: 0 },
+      }),
+    ).toThrow(AdapterError);
   });
 });

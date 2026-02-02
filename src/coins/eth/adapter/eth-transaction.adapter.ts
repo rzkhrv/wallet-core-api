@@ -9,8 +9,6 @@ import {
   EthErc20TransferBuildAdapterOutput,
   EthErc20TransferIntent,
 } from './dto/eth-erc20-transfer-build-output.dto';
-import { EthErc20TransferSignAdapterInput } from './dto/eth-erc20-transfer-sign-input.dto';
-import { EthErc20TransferSignAdapterOutput } from './dto/eth-erc20-transfer-sign-output.dto';
 import { EthTransactionBuildAdapterInput } from './dto/eth-transaction-build-input.dto';
 import {
   EthTransactionBuildAdapterOutput,
@@ -114,28 +112,6 @@ export class EthTransactionAdapter implements CoinTransactionAdapter<
       input.privateKey,
       'ETH_SIGNING_FAILED',
       'ETH signing failed',
-    );
-  }
-
-  /**
-   * Signs an ERC20 transfer payload.
-   * @param input Adapter request payload.
-   * @returns Signed transfer response.
-   */
-  signTransfer(
-    input: EthErc20TransferSignAdapterInput,
-  ): EthErc20TransferSignAdapterOutput {
-    this.logger.log('Signing ETH ERC20 transfer');
-    const signingInput = this.decodeSigningInput(
-      input.payload,
-      'ETH_ERC20_SIGNING_INPUT_INVALID',
-      'ETH ERC20 signing payload invalid',
-    );
-    return this.signSigningInput(
-      signingInput,
-      input.privateKey,
-      'ETH_ERC20_SIGNING_FAILED',
-      'ETH ERC20 signing failed',
     );
   }
 

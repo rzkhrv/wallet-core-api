@@ -11,6 +11,7 @@ import type { WalletCore } from '@trustwallet/wallet-core';
 
 type AnyAddressInstance = InstanceType<WalletCore['AnyAddress']>;
 type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
+type HDWalletInstance = InstanceType<WalletCore['HDWallet']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
@@ -41,13 +42,19 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
     let derivationPath: DerivationPathInstance | null = null;
     let privateKey: PrivateKeyInstance | null = null;
     let publicKey: PublicKeyInstance | null = null;
-
-    const wallet = this.walletCore.createHDWalletWithMnemonic(
-      input.mnemonic.value,
-      passphrase,
-    );
+    let wallet: HDWalletInstance | null = null;
 
     try {
+      if (!this.walletCore.isMnemonicValid(input.mnemonic.value)) {
+        throw new AdapterError(
+          'BTC_MNEMONIC_INVALID',
+          'BTC mnemonic is invalid',
+        );
+      }
+      wallet = this.walletCore.createHDWalletWithMnemonic(
+        input.mnemonic.value,
+        passphrase,
+      );
       derivationPath = core.DerivationPath.create(
         purpose,
         slip44,
@@ -55,17 +62,14 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
         input.derivation.change,
         input.derivation.index,
       );
-
       const path = derivationPath.description();
       privateKey = wallet.getKey(coinType, path);
       publicKey = privateKey.getPublicKey(coinType);
-
       address = core.AnyAddress.createWithPublicKeyDerivation(
         publicKey,
         coinType,
         derivation,
       );
-
       return {
         address: address.description(),
         keys: {
@@ -82,6 +86,9 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
         },
       };
     } catch (error: unknown) {
+      if (error instanceof AdapterError) {
+        throw error;
+      }
       const cause = error instanceof Error ? error.message : String(error);
       throw new AdapterError(
         'BTC_ADDRESS_GENERATION_FAILED',
@@ -95,7 +102,7 @@ export class BtcAddressAdapter implements CoinAddressAdapter<
       publicKey?.delete();
       privateKey?.delete();
       derivationPath?.delete();
-      wallet.delete();
+      wallet?.delete();
     }
   }
 

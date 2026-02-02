@@ -11,6 +11,7 @@ import { EthAddressValidateAdapterOutput } from './dto/eth-address-validate-outp
 
 type AnyAddressInstance = InstanceType<WalletCore['AnyAddress']>;
 type DerivationPathInstance = InstanceType<WalletCore['DerivationPath']>;
+type HDWalletInstance = InstanceType<WalletCore['HDWallet']>;
 type PrivateKeyInstance = InstanceType<WalletCore['PrivateKey']>;
 type PublicKeyInstance = InstanceType<WalletCore['PublicKey']>;
 
@@ -41,13 +42,19 @@ export class EthAddressAdapter implements CoinAddressAdapter<
     let derivationPath: DerivationPathInstance | null = null;
     let privateKey: PrivateKeyInstance | null = null;
     let publicKey: PublicKeyInstance | null = null;
-
-    const wallet = this.walletCore.createHDWalletWithMnemonic(
-      input.mnemonic.value,
-      passphrase,
-    );
+    let wallet: HDWalletInstance | null = null;
 
     try {
+      if (!this.walletCore.isMnemonicValid(input.mnemonic.value)) {
+        throw new AdapterError(
+          'ETH_MNEMONIC_INVALID',
+          'ETH mnemonic is invalid',
+        );
+      }
+      wallet = this.walletCore.createHDWalletWithMnemonic(
+        input.mnemonic.value,
+        passphrase,
+      );
       derivationPath = core.DerivationPath.create(
         purpose,
         slip44,
@@ -55,7 +62,6 @@ export class EthAddressAdapter implements CoinAddressAdapter<
         input.derivation.change,
         input.derivation.index,
       );
-
       const path = derivationPath.description();
       privateKey = wallet.getKey(coinType, path);
       publicKey = privateKey.getPublicKey(coinType);
@@ -64,7 +70,6 @@ export class EthAddressAdapter implements CoinAddressAdapter<
         coinType,
         derivation,
       );
-
       return {
         address: address.description(),
         keys: {
@@ -81,6 +86,9 @@ export class EthAddressAdapter implements CoinAddressAdapter<
         },
       };
     } catch (error: unknown) {
+      if (error instanceof AdapterError) {
+        throw error;
+      }
       const cause = error instanceof Error ? error.message : String(error);
       throw new AdapterError(
         'ETH_ADDRESS_GENERATION_FAILED',
@@ -94,7 +102,7 @@ export class EthAddressAdapter implements CoinAddressAdapter<
       publicKey?.delete();
       privateKey?.delete();
       derivationPath?.delete();
-      wallet.delete();
+      wallet?.delete();
     }
   }
 

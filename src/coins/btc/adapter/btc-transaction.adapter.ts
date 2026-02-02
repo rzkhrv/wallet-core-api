@@ -43,6 +43,7 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
     try {
       const signingInput = this.createSigningInput(input, coinType.value);
       const plan = this.planForInput(signingInput, coinType);
+      this.ensurePlanOk(plan);
       signingInput.plan = plan;
 
       return {
@@ -174,6 +175,20 @@ export class BtcTransactionAdapter implements CoinTransactionAdapter<
       TW.Bitcoin.Proto.SigningInput.encode(signingInput).finish();
     const planBytes = core.AnySigner.plan(inputBytes, coinType);
     return TW.Bitcoin.Proto.TransactionPlan.decode(planBytes);
+  }
+
+  private ensurePlanOk(plan: TW.Bitcoin.Proto.TransactionPlan): void {
+    const error: TW.Common.Proto.SigningError =
+      plan.error ?? TW.Common.Proto.SigningError.OK;
+    if (error !== TW.Common.Proto.SigningError.OK) {
+      const errorName: string =
+        TW.Common.Proto.SigningError[error] ?? 'UNKNOWN';
+      throw new AdapterError(
+        'BTC_TRANSACTION_PLAN_FAILED',
+        'BTC transaction plan failed',
+        { error, errorName },
+      );
+    }
   }
 
   private requirePlan(
