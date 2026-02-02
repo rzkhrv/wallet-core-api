@@ -35,7 +35,9 @@ describe('TRON transaction service', () => {
     signature: 'bb',
     refBlockBytes: 'cc',
     refBlockHash: 'dd',
+    rawDataHex: 'ee',
     signedJson: '{}',
+    visible: false,
   };
 
   const makeService = () => {
@@ -77,6 +79,8 @@ describe('TRON transaction service', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
     });
     expect(result).toEqual({
       payload: encodePayload(adapterBuildResponse.rawJson),
@@ -96,6 +100,8 @@ describe('TRON transaction service', () => {
         ownerAddress: 'TXYZ',
         toAddress: 'TABC',
         amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
       }),
     );
   });
@@ -120,6 +126,8 @@ describe('TRON transaction service', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '100',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
       assetName: 'TOKEN',
     });
     expect(result).toEqual({
@@ -142,6 +150,8 @@ describe('TRON transaction service', () => {
       expect.objectContaining({
         transferType: 'trc10',
         assetName: 'TOKEN',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
       }),
     );
   });
@@ -168,6 +178,8 @@ describe('TRON transaction service', () => {
       toAddress: 'TABC',
       contractAddress: 'TCONTRACT',
       amount: '100',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
       callValue: '0',
       feeLimit: '10000000',
     });
@@ -193,6 +205,8 @@ describe('TRON transaction service', () => {
         contractAddress: 'TCONTRACT',
         callValue: '0',
         feeLimit: '10000000',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
       }),
     );
   });

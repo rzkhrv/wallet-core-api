@@ -32,7 +32,9 @@ describe('TronTransactionController', () => {
     signature: 'sig',
     refBlockBytes: 'aa',
     refBlockHash: 'bb',
+    rawDataHex: 'cc',
     signedJson: '{}',
+    visible: false,
   };
   beforeEach(async () => {
     service = {
@@ -61,6 +63,8 @@ describe('TronTransactionController', () => {
       toAddress: 'TABC',
       contractAddress: 'TCONTRACT',
       amount: '1',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
       feeLimit: '10000000',
       callValue: '0',
     };
@@ -74,6 +78,8 @@ describe('TronTransactionController', () => {
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       amount: '1',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
     };
     const result = controller.buildTransaction(body);
     expect(service.buildTransaction).toHaveBeenCalledWith(body);

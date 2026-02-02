@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import type { WalletCore } from '@trustwallet/wallet-core';
 import { TronTransactionAdapter } from './adapter/tron-transaction.adapter';
 import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
@@ -26,6 +27,14 @@ const resolveTrc20Amount = (rawJson: string): bigint => {
   return amount;
 };
 
+const normalizeHex = (value: string): string =>
+  value.startsWith('0x') || value.startsWith('0X') ? value.slice(2) : value;
+
+const hashRawDataHex = (rawDataHex: string): string =>
+  createHash('sha256')
+    .update(Buffer.from(normalizeHex(rawDataHex), 'hex'))
+    .digest('hex');
+
 describe('TRON transaction build/signing', () => {
   let walletCore: WalletCoreAdapter;
   let transactionAdapter: TronTransactionAdapter;
@@ -44,19 +53,29 @@ describe('TRON transaction build/signing', () => {
     const privateKey = core.HexCoding.encode(
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
+    const blockId = '11'.repeat(32);
+    const blockNumber = '0x1234';
 
     const now = Date.now();
     const result = transactionAdapter.buildTransaction({
       ownerAddress,
       toAddress: recipientAddress,
       amount: '1',
+      blockId,
+      blockNumber,
       timestamp: `${now}`,
       expiration: `${now + 60_000}`,
     });
 
     expect(result.rawJson).toBeDefined();
-    const parsed = JSON.parse(result.rawJson) as { transfer?: unknown };
+    const parsed = JSON.parse(result.rawJson) as {
+      transfer?: unknown;
+      refBlockBytes?: string;
+      refBlockHash?: string;
+    };
     expect(parsed.transfer).toBeDefined();
+    expect(parsed.refBlockBytes).toBe('1234');
+    expect(parsed.refBlockHash).toBe('11'.repeat(8));
 
     const signed = transactionAdapter.signTransaction({
       rawJson: result.rawJson,
@@ -65,7 +84,17 @@ describe('TRON transaction build/signing', () => {
 
     expect(signed.txId).toBeDefined();
     expect(signed.signature).toBeDefined();
+    expect(signed.rawDataHex).toBeDefined();
     expect(signed.signedJson).toBeDefined();
+    const signedJson = JSON.parse(signed.signedJson) as {
+      raw_data?: { ref_block_bytes?: string; ref_block_hash?: string };
+      raw_data_hex?: string;
+    };
+    expect(signedJson.raw_data?.ref_block_bytes).toBe('1234');
+    expect(signedJson.raw_data?.ref_block_hash).toBe('11'.repeat(8));
+    expect(signedJson.raw_data_hex).toBe(signed.rawDataHex);
+    const computedTxId = hashRawDataHex(signed.rawDataHex);
+    expect(normalizeHex(signed.txId)).toBe(computedTxId);
 
     wallet.delete();
   });
@@ -79,6 +108,8 @@ describe('TRON transaction build/signing', () => {
     const privateKey = core.HexCoding.encode(
       wallet.getKeyForCoin(core.CoinType.tron).data(),
     );
+    const blockId = '11'.repeat(32);
+    const blockNumber = '0x1234';
 
     const result = transactionAdapter.buildTransfer({
       transferType: 'trc20',
@@ -86,6 +117,8 @@ describe('TRON transaction build/signing', () => {
       toAddress: recipientAddress,
       contractAddress,
       amount: '1',
+      blockId,
+      blockNumber,
       feeLimit: '10000000',
       callValue: '0',
     });
@@ -113,7 +146,17 @@ describe('TRON transaction build/signing', () => {
 
     expect(signed.txId).toBeDefined();
     expect(signed.signature).toBeDefined();
+    expect(signed.rawDataHex).toBeDefined();
     expect(signed.signedJson).toBeDefined();
+    const signedJson = JSON.parse(signed.signedJson) as {
+      raw_data?: { ref_block_bytes?: string; ref_block_hash?: string };
+      raw_data_hex?: string;
+    };
+    expect(signedJson.raw_data?.ref_block_bytes).toBe('1234');
+    expect(signedJson.raw_data?.ref_block_hash).toBe('11'.repeat(8));
+    expect(signedJson.raw_data_hex).toBe(signed.rawDataHex);
+    const computedTxId = hashRawDataHex(signed.rawDataHex);
+    expect(normalizeHex(signed.txId)).toBe(computedTxId);
 
     wallet.delete();
   });
@@ -130,6 +173,8 @@ describe('TRON transaction build/signing', () => {
       toAddress: recipientAddress,
       contractAddress,
       amount: '10',
+      blockId: '11'.repeat(32),
+      blockNumber: '0x1234',
       feeLimit: '10000000',
       callValue: '0',
     }).rawJson;
@@ -141,6 +186,8 @@ describe('TRON transaction build/signing', () => {
       toAddress: recipientAddress,
       contractAddress,
       amount: '0x10',
+      blockId: '11'.repeat(32),
+      blockNumber: '0x1234',
       feeLimit: '10000000',
       callValue: '0',
     }).rawJson;

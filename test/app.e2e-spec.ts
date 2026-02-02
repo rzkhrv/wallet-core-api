@@ -42,7 +42,12 @@ type TronBuildResponse = {
     memo?: string | null;
   };
 };
-type TronSignResponse = { txId: string; signature: string };
+type TronSignResponse = {
+  txId: string;
+  signature: string;
+  rawDataHex: string;
+  visible: boolean;
+};
 
 type BtcBuildResponse = {
   payload: string;
@@ -264,6 +269,8 @@ describe('Wallet Core API (e2e)', () => {
         ownerAddress: tronAddress,
         toAddress: tronAddress,
         amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
       })
       .expect(201);
 
@@ -283,6 +290,8 @@ describe('Wallet Core API (e2e)', () => {
         ownerAddress: 'invalid',
         toAddress: tronAddress,
         amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
       })
       .expect(400);
   });
@@ -296,6 +305,8 @@ describe('Wallet Core API (e2e)', () => {
         toAddress: tronAddress,
         contractAddress: tronAddress,
         amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
         feeLimit: '10000000',
         callValue: '0',
       })
@@ -321,6 +332,8 @@ describe('Wallet Core API (e2e)', () => {
         toAddress: tronAddress,
         contractAddress: 'invalid',
         amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '1',
         feeLimit: '10000000',
         callValue: '0',
       })
@@ -339,6 +352,8 @@ describe('Wallet Core API (e2e)', () => {
     const body = response.body as TronSignResponse;
     expect(body.txId).toBeDefined();
     expect(body.signature).toBeDefined();
+    expect(body.rawDataHex).toBeDefined();
+    expect(body.visible).toBe(false);
   });
 
   it('POST /api/v1/transaction/tron/sign (trc20)', async () => {
@@ -353,6 +368,8 @@ describe('Wallet Core API (e2e)', () => {
     const body = response.body as TronSignResponse;
     expect(body.txId).toBeDefined();
     expect(body.signature).toBeDefined();
+    expect(body.rawDataHex).toBeDefined();
+    expect(body.visible).toBe(false);
   });
 
   it('POST /api/v1/transaction/tron/sign rejects invalid json', async () => {

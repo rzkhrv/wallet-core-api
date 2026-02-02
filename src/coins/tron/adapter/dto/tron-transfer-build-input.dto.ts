@@ -11,6 +11,8 @@ export interface TronTransferBuildAdapterInput {
   ownerAddress: string;
   toAddress: string;
   amount: string;
+  blockId: string;
+  blockNumber: string;
   assetName?: string;
   contractAddress?: string;
   callValue?: string;

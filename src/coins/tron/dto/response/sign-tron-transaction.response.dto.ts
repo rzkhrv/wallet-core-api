@@ -13,6 +13,12 @@ export class SignTronTransactionResponseDto {
   @ApiProperty({ example: 'a1b2c3d4' })
   refBlockHash: string;
 
+  @ApiProperty({ example: '0a02193b2208...' })
+  rawDataHex: string;
+
+  @ApiProperty({ example: false })
+  visible: boolean;
+
   @ApiProperty({ example: '{"signature":["..."],"raw_data":{...}}' })
   signedJson: string;
 }

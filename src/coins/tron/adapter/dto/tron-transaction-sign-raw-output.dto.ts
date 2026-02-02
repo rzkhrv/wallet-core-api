@@ -6,5 +6,7 @@ export interface TronSignRawTransactionAdapterOutput {
   signature: string;
   refBlockBytes: string;
   refBlockHash: string;
+  rawDataHex: string;
   signedJson: string;
+  visible: boolean;
 }

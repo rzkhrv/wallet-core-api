@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 
 const NUMERIC_STRING_REGEX = /^(?:[0-9]+|0[xX][0-9a-fA-F]+)$/;
+const BLOCK_ID_REGEX = /^(0x)?[0-9a-fA-F]{64}$/;
 
 export enum TronTransferType {
   TRC10 = 'trc10',
@@ -58,6 +59,24 @@ export class BuildTronTransferRequestDto {
   @IsString()
   @IsNotEmpty()
   amount: string;
+
+  @ApiProperty({
+    example: '0000000000000001f3a1b2c3d4e5f60708090a0b0c0d0e0f1011121314151617',
+    description: 'Block ID (hex, 32 bytes)',
+  })
+  @Matches(BLOCK_ID_REGEX)
+  @IsString()
+  @IsNotEmpty()
+  blockId: string;
+
+  @ApiProperty({
+    example: '1234567',
+    description: 'Block number (decimal or 0x-prefixed hex)',
+  })
+  @Matches(NUMERIC_STRING_REGEX)
+  @IsString()
+  @IsNotEmpty()
+  blockNumber: string;
 
   @ApiPropertyOptional({
     example: 'USDT',
