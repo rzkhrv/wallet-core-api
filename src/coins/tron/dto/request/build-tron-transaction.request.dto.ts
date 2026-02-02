@@ -8,8 +8,8 @@ import {
   Matches,
 } from 'class-validator';
 
-const NUMERIC_STRING_REGEX = /^(?:[0-9]+|0[xX][0-9a-fA-F]+)$/;
-const BLOCK_ID_REGEX = /^(0x)?[0-9a-fA-F]{64}$/;
+const DECIMAL_STRING_REGEX = /^[0-9]+$/;
+const BLOCK_ID_REGEX = /^[0-9a-fA-F]{64}$/;
 
 export class BuildTronTransactionRequestDto {
   @ApiProperty({
@@ -36,9 +36,9 @@ export class BuildTronTransactionRequestDto {
 
   @ApiProperty({
     example: '1000000',
-    description: 'Amount in SUN (decimal or 0x-prefixed hex)',
+    description: 'Amount in SUN (decimal)',
   })
-  @Matches(NUMERIC_STRING_REGEX)
+  @Matches(DECIMAL_STRING_REGEX)
   @IsString()
   @IsNotEmpty()
   amount: string;
@@ -54,9 +54,9 @@ export class BuildTronTransactionRequestDto {
 
   @ApiProperty({
     example: '1234567',
-    description: 'Block number (decimal or 0x-prefixed hex)',
+    description: 'Block number (decimal)',
   })
-  @Matches(NUMERIC_STRING_REGEX)
+  @Matches(DECIMAL_STRING_REGEX)
   @IsString()
   @IsNotEmpty()
   blockNumber: string;
@@ -64,29 +64,29 @@ export class BuildTronTransactionRequestDto {
   @ApiPropertyOptional({
     example: '1738253400000',
     description:
-      'Transaction timestamp in milliseconds (defaults to now), decimal or 0x-prefixed hex',
+      'Transaction timestamp in milliseconds (decimal, defaults to now)',
   })
   @IsOptional()
-  @Matches(NUMERIC_STRING_REGEX)
+  @Matches(DECIMAL_STRING_REGEX)
   @IsString()
   timestamp?: string;
 
   @ApiPropertyOptional({
     example: '1738253460000',
     description:
-      'Transaction expiration in milliseconds (defaults to now + 60s), decimal or 0x-prefixed hex',
+      'Transaction expiration in milliseconds (decimal, defaults to now + 60s)',
   })
   @IsOptional()
-  @Matches(NUMERIC_STRING_REGEX)
+  @Matches(DECIMAL_STRING_REGEX)
   @IsString()
   expiration?: string;
 
   @ApiPropertyOptional({
     example: '10000000',
-    description: 'Fee limit in SUN (decimal or 0x-prefixed hex)',
+    description: 'Fee limit in SUN (decimal)',
   })
   @IsOptional()
-  @Matches(NUMERIC_STRING_REGEX)
+  @Matches(DECIMAL_STRING_REGEX)
   @IsString()
   feeLimit?: string;
 

@@ -11,6 +11,7 @@ Provide a copy/paste-friendly shape for new coin endpoints.
 2. Add a controller that calls a service method and applies Swagger decorators.
 3. Implement the service to map API DTOs to adapter DTOs and call the adapter.
 4. Keep wallet-core logic inside adapters only.
+5. For transaction adapters, follow the proto-first pattern (see references).
 
 ## Example
 ```ts
@@ -57,5 +58,6 @@ export class BtcAddressService {
 - `src/coins/btc/btc-address.controller.ts`
 - `src/coins/btc/service/btc-address.service.ts`
 - `src/coins/btc/adapter/btc-address.adapter.ts`
+- `docs/agents/patterns/proto-first-transactions.md`
 
 Last updated: 2026-02-01

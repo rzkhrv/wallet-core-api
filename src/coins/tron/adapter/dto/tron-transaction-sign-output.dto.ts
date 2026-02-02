@@ -1,7 +1,7 @@
 /**
- * Adapter response payload for TRON raw transaction signing.
+ * Adapter response payload for TRON transaction signing.
  */
-export interface TronSignRawTransactionAdapterOutput {
+export interface TronTransactionSignAdapterOutput {
   txId: string;
   signature: string;
   refBlockBytes: string;

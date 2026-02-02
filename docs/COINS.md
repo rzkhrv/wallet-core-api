@@ -64,7 +64,7 @@ src/
 
 ## Endpoint naming conventions (transactions)
 - `build-transaction` builds native coin transactions only.
-- `build-transfer` builds token transfers only (ERC20/TRC20/TRC10).
+- `build-transfer` builds token transfers only (ERC20/TRC20).
 - `sign` signs payloads from either build endpoint.
 - Keep route names consistent with existing coins and document any deviations.
 

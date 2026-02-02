@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class TronTransactionIntentResponseDto {
   @ApiProperty({
     example: 'trx',
-    description: 'TRON transaction type (trx, trc10, trc20)',
+    description: 'TRON transaction type (trx, trc20)',
   })
   type: string;
 
@@ -26,12 +26,6 @@ export class TronTransactionIntentResponseDto {
   amount: string;
 
   @ApiPropertyOptional({
-    example: 'USDT',
-    description: 'TRC10 asset name',
-  })
-  assetName?: string;
-
-  @ApiPropertyOptional({
     example: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
     description: 'TRC20 contract address',
   })
@@ -40,8 +34,9 @@ export class TronTransactionIntentResponseDto {
   @ApiPropertyOptional({
     example: '0',
     description: 'TRX call value in SUN (decimal)',
+    nullable: true,
   })
-  callValue?: string;
+  callValue?: string | null;
 
   @ApiProperty({
     example: '1738253400000',
@@ -72,9 +67,9 @@ export class TronTransactionIntentResponseDto {
 
 export class BuildTronTransactionResponseDto {
   @ApiProperty({
-    example:
-      '0x7b227472616e73666572223a7b226f776e657241646472657373223a222e2e2e222c22746f41646472657373223a222e2e2e222c22616d6f756e74223a2231227d2c2274696d657374616d70223a2231373338323533343030303030222c2265787069726174696f6e223a2231373338323533343630303030227d',
-    description: 'Signing payload from build step (hex-encoded UTF-8 raw JSON)',
+    example: '0x0a0200002208...',
+    description:
+      'Signing payload from build step (hex-encoded Wallet-Core SigningInput)',
   })
   payload: string;
 

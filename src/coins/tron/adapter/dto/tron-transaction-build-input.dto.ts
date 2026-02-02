@@ -7,8 +7,8 @@ export interface TronTransactionBuildAdapterInput {
   amount: string;
   blockId: string;
   blockNumber: string;
-  timestamp?: string;
-  expiration?: string;
+  timestamp: string;
+  expiration: string;
   feeLimit?: string;
   memo?: string;
 }

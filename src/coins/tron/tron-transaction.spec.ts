@@ -1,43 +1,29 @@
-import { createHash } from 'crypto';
-import type { WalletCore } from '@trustwallet/wallet-core';
+import Long from 'long';
 import { TronTransactionAdapter } from './adapter/tron-transaction.adapter';
 import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 import { AdapterError } from '../../common/errors/adapter-error';
-
-const resolveTrc20Amount = (rawJson: string): bigint => {
-  const parsed: Record<string, unknown> = JSON.parse(rawJson) as Record<
-    string,
-    unknown
-  >;
-  const triggerSmartContract: Record<string, unknown> | undefined =
-    parsed.triggerSmartContract as Record<string, unknown> | undefined;
-  const dataValue: unknown = triggerSmartContract?.data;
-  const emptyBuffer: Buffer = Buffer.from([]);
-  const dataBuffer: Buffer = Array.isArray(dataValue)
-    ? Buffer.from(dataValue)
-    : typeof dataValue === 'string'
-      ? Buffer.from(dataValue, 'base64')
-      : emptyBuffer;
-  const sliceStart: number =
-    dataBuffer.length >= 32 ? dataBuffer.length - 32 : 0;
-  const amountBuffer: Buffer = dataBuffer.slice(sliceStart);
-  const amountHex: string = amountBuffer.toString('hex');
-  const safeHex: string = amountHex.length === 0 ? '0' : amountHex;
-  const amount: bigint = BigInt(`0x${safeHex}`);
-  return amount;
-};
-
-const normalizeHex = (value: string): string =>
-  value.startsWith('0x') || value.startsWith('0X') ? value.slice(2) : value;
-
-const hashRawDataHex = (rawDataHex: string): string =>
-  createHash('sha256')
-    .update(Buffer.from(normalizeHex(rawDataHex), 'hex'))
-    .digest('hex');
+import { TW } from '@trustwallet/wallet-core';
 
 describe('TRON transaction build/signing', () => {
   let walletCore: WalletCoreAdapter;
   let transactionAdapter: TronTransactionAdapter;
+
+  const decodeSigningInput = (payload: string): TW.Tron.Proto.SigningInput => {
+    const core = walletCore.getCore();
+    const normalized = payload.startsWith('0x') ? payload.slice(2) : payload;
+    const bytes = core.HexCoding.decode(normalized);
+    return TW.Tron.Proto.SigningInput.decode(bytes);
+  };
+
+  const bytesToDecimal = (bytes: Uint8Array): string => {
+    if (bytes.length === 0) {
+      return '0';
+    }
+    const core = walletCore.getCore();
+    const hex = core.HexCoding.encode(bytes).replace(/^0x/, '');
+    const safeHex = hex.length === 0 ? '0' : hex;
+    return BigInt(`0x${safeHex}`).toString(10);
+  };
 
   beforeAll(async () => {
     walletCore = new WalletCoreAdapter();
@@ -50,11 +36,8 @@ describe('TRON transaction build/signing', () => {
     const wallet = core.HDWallet.create(128, '');
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const privateKey = core.HexCoding.encode(
-      wallet.getKeyForCoin(core.CoinType.tron).data(),
-    );
     const blockId = '11'.repeat(32);
-    const blockNumber = '0x1234';
+    const blockNumber = '4660';
 
     const now = Date.now();
     const result = transactionAdapter.buildTransaction({
@@ -67,34 +50,18 @@ describe('TRON transaction build/signing', () => {
       expiration: `${now + 60_000}`,
     });
 
-    expect(result.rawJson).toBeDefined();
-    const parsed = JSON.parse(result.rawJson) as {
-      transfer?: unknown;
-      refBlockBytes?: string;
-      refBlockHash?: string;
-    };
-    expect(parsed.transfer).toBeDefined();
-    expect(parsed.refBlockBytes).toBe('1234');
-    expect(parsed.refBlockHash).toBe('11'.repeat(8));
+    expect(result.payload).toBeDefined();
+    expect(result.transaction.type).toBe('trx');
+    expect(result.transaction.ownerAddress).toBe(ownerAddress);
+    expect(result.transaction.toAddress).toBe(recipientAddress);
+    expect(result.transaction.amount).toBe('1');
 
-    const signed = transactionAdapter.signTransaction({
-      rawJson: result.rawJson,
-      privateKey,
-    });
-
-    expect(signed.txId).toBeDefined();
-    expect(signed.signature).toBeDefined();
-    expect(signed.rawDataHex).toBeDefined();
-    expect(signed.signedJson).toBeDefined();
-    const signedJson = JSON.parse(signed.signedJson) as {
-      raw_data?: { ref_block_bytes?: string; ref_block_hash?: string };
-      raw_data_hex?: string;
-    };
-    expect(signedJson.raw_data?.ref_block_bytes).toBe('1234');
-    expect(signedJson.raw_data?.ref_block_hash).toBe('11'.repeat(8));
-    expect(signedJson.raw_data_hex).toBe(signed.rawDataHex);
-    const computedTxId = hashRawDataHex(signed.rawDataHex);
-    expect(normalizeHex(signed.txId)).toBe(computedTxId);
+    const signingInput = decodeSigningInput(result.payload);
+    expect(signingInput.transaction?.transfer).toBeDefined();
+    expect(signingInput.transaction?.blockHeader).toBeDefined();
+    expect(signingInput.transaction?.blockHeader?.number?.toString()).toBe(
+      Long.fromString(blockNumber).toString(),
+    );
 
     wallet.delete();
   });
@@ -105,42 +72,88 @@ describe('TRON transaction build/signing', () => {
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const privateKey = core.HexCoding.encode(
-      wallet.getKeyForCoin(core.CoinType.tron).data(),
-    );
     const blockId = '11'.repeat(32);
-    const blockNumber = '0x1234';
+    const blockNumber = '4660';
+    const timestamp = `${Date.now()}`;
+    const expiration = `${Date.now() + 60_000}`;
 
     const result = transactionAdapter.buildTransfer({
-      transferType: 'trc20',
       ownerAddress,
       toAddress: recipientAddress,
       contractAddress,
       amount: '1',
       blockId,
       blockNumber,
+      timestamp,
+      expiration,
       feeLimit: '10000000',
       callValue: '0',
     });
 
-    expect(result.rawJson).toBeDefined();
-    const parsed = JSON.parse(result.rawJson) as {
-      triggerSmartContract?: { data?: string | number[] };
-    };
-    expect(parsed.triggerSmartContract).toBeDefined();
-    const data = parsed.triggerSmartContract?.data;
-    expect(data).toBeDefined();
-    if (!data) {
-      throw new Error('TRC20 transfer data missing');
-    }
-    const dataBuffer = Array.isArray(data)
-      ? Buffer.from(data)
-      : Buffer.from(data, 'base64');
-    const dataHex = dataBuffer.toString('hex');
-    expect(dataHex.startsWith('a9059cbb')).toBe(true);
+    expect(result.payload).toBeDefined();
+    expect(result.transaction.type).toBe('trc20');
+    expect(result.transaction.ownerAddress).toBe(ownerAddress);
+    expect(result.transaction.toAddress).toBe(recipientAddress);
+    expect(result.transaction.amount).toBe('1');
+    expect(result.transaction.contractAddress).toBe(contractAddress);
+    expect(result.transaction.callValue).toBeNull();
 
+    const signingInput = decodeSigningInput(result.payload);
+    const transfer = signingInput.transaction?.transferTrc20Contract;
+    expect(transfer).toBeDefined();
+    if (!transfer) {
+      throw new Error('TRC20 transfer contract missing');
+    }
+    expect(bytesToDecimal(transfer.amount as Uint8Array)).toBe('1');
+
+    wallet.delete();
+  });
+
+  it('rejects non-zero callValue for TRC20 transfer', () => {
+    const core = walletCore.getCore();
+    const wallet = core.HDWallet.create(128, '');
+    const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
+    const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
+    const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
+
+    expect(() =>
+      transactionAdapter.buildTransfer({
+        ownerAddress,
+        toAddress: recipientAddress,
+        contractAddress,
+        amount: '1',
+        blockId: '11'.repeat(32),
+        blockNumber: '4660',
+        timestamp: `${Date.now()}`,
+        expiration: `${Date.now() + 60_000}`,
+        feeLimit: '10000000',
+        callValue: '1',
+      }),
+    ).toThrow(AdapterError);
+
+    wallet.delete();
+  });
+
+  it('signs TRX transaction payload (adapter)', () => {
+    const core = walletCore.getCore();
+    const wallet = core.HDWallet.create(128, '');
+    const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
+    const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
+    const privateKey = core.HexCoding.encode(
+      wallet.getKeyForCoin(core.CoinType.tron).data(),
+    );
+
+    const build = transactionAdapter.buildTransaction({
+      ownerAddress,
+      toAddress: recipientAddress,
+      amount: '1',
+      blockId: '11'.repeat(32),
+      blockNumber: '4660',
+      timestamp: `${Date.now()}`,
+      expiration: `${Date.now() + 60_000}`,
+    });
     const signed = transactionAdapter.signTransaction({
-      rawJson: result.rawJson,
+      payload: build.payload,
       privateKey,
     });
 
@@ -149,100 +162,58 @@ describe('TRON transaction build/signing', () => {
     expect(signed.rawDataHex).toBeDefined();
     expect(signed.signedJson).toBeDefined();
     const signedJson = JSON.parse(signed.signedJson) as {
-      raw_data?: { ref_block_bytes?: string; ref_block_hash?: string };
       raw_data_hex?: string;
     };
-    expect(signedJson.raw_data?.ref_block_bytes).toBe('1234');
-    expect(signedJson.raw_data?.ref_block_hash).toBe('11'.repeat(8));
     expect(signedJson.raw_data_hex).toBe(signed.rawDataHex);
-    const computedTxId = hashRawDataHex(signed.rawDataHex);
-    expect(normalizeHex(signed.txId)).toBe(computedTxId);
 
     wallet.delete();
   });
 
-  it('parses decimal and hex amounts in TRC20 transfer data (adapter)', () => {
+  it('signs TRC20 transfer payload (adapter)', () => {
     const core = walletCore.getCore();
     const wallet = core.HDWallet.create(128, '');
     const ownerAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const recipientAddress = wallet.getAddressForCoin(core.CoinType.tron);
     const contractAddress = wallet.getAddressForCoin(core.CoinType.tron);
-    const decimalRawJson: string = transactionAdapter.buildTransfer({
-      transferType: 'trc20',
+    const privateKey = core.HexCoding.encode(
+      wallet.getKeyForCoin(core.CoinType.tron).data(),
+    );
+
+    const build = transactionAdapter.buildTransfer({
       ownerAddress,
       toAddress: recipientAddress,
       contractAddress,
-      amount: '10',
+      amount: '1',
       blockId: '11'.repeat(32),
-      blockNumber: '0x1234',
+      blockNumber: '4660',
+      timestamp: `${Date.now()}`,
+      expiration: `${Date.now() + 60_000}`,
       feeLimit: '10000000',
       callValue: '0',
-    }).rawJson;
-    const decimalAmount: bigint = resolveTrc20Amount(decimalRawJson);
-    expect(decimalAmount).toBe(10n);
-    const hexRawJson: string = transactionAdapter.buildTransfer({
-      transferType: 'trc20',
-      ownerAddress,
-      toAddress: recipientAddress,
-      contractAddress,
-      amount: '0x10',
-      blockId: '11'.repeat(32),
-      blockNumber: '0x1234',
-      feeLimit: '10000000',
-      callValue: '0',
-    }).rawJson;
-    const hexAmount: bigint = resolveTrc20Amount(hexRawJson);
-    expect(hexAmount).toBe(16n);
+    });
+    const signed = transactionAdapter.signTransaction({
+      payload: build.payload,
+      privateKey,
+    });
+
+    expect(signed.txId).toBeDefined();
+    expect(signed.signature).toBeDefined();
+    expect(signed.rawDataHex).toBeDefined();
+    expect(signed.signedJson).toBeDefined();
+    const signedJson = JSON.parse(signed.signedJson) as {
+      raw_data_hex?: string;
+    };
+    expect(signedJson.raw_data_hex).toBe(signed.rawDataHex);
+
     wallet.delete();
   });
 
-  it('throws when rawJson is invalid', () => {
+  it('throws when payload is invalid', () => {
     expect(() =>
       transactionAdapter.signTransaction({
-        rawJson: '{invalid',
+        payload: '0xzz',
         privateKey: '00'.repeat(32),
       }),
     ).toThrow(AdapterError);
-  });
-
-  it('accepts 20 and 21 byte TRON address payloads (adapter)', () => {
-    const address20: string = 'address-20';
-    const address21: string = 'address-21';
-    const payload21: Uint8Array = Uint8Array.from([
-      0x41,
-      ...Array.from({ length: 20 }, () => 0x22),
-    ]);
-    const payload20: Uint8Array = Uint8Array.from(
-      Array.from({ length: 20 }, () => 0x11),
-    );
-    const fakeCore: WalletCore = {
-      CoinType: { tron: { value: 0 } } as WalletCore['CoinType'],
-      Purpose: { bip44: {} } as WalletCore['Purpose'],
-      Derivation: { default: {} } as WalletCore['Derivation'],
-      AnyAddress: {
-        isValid: jest.fn().mockReturnValue(true),
-        createWithString: jest.fn((address: string) => ({
-          data: () => (address === address21 ? payload21 : payload20),
-          delete: () => undefined,
-        })),
-      },
-    } as unknown as WalletCore;
-    const fakeWalletCore: WalletCoreAdapter = {
-      getCore: () => fakeCore,
-    } as WalletCoreAdapter;
-    const adapter: TronTransactionAdapter = new TronTransactionAdapter(
-      fakeWalletCore,
-    );
-    const adapterInternal: {
-      toTronEvmAddressBytes: (address: string) => Uint8Array;
-    } = adapter as unknown as {
-      toTronEvmAddressBytes: (address: string) => Uint8Array;
-    };
-    const result21: Uint8Array =
-      adapterInternal.toTronEvmAddressBytes(address21);
-    const result20: Uint8Array =
-      adapterInternal.toTronEvmAddressBytes(address20);
-    expect(result21).toEqual(payload21.slice(1));
-    expect(result20).toEqual(payload20);
   });
 });

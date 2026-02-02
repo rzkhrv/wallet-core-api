@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BuildTronTransactionRequestDto } from './dto/request/build-tron-transaction.request.dto';
 import { BuildTronTransferRequestDto } from './dto/request/build-tron-transfer.request.dto';
-import { SignTronRawTransactionRequestDto } from './dto/request/sign-tron-raw-transaction.request.dto';
+import { SignTronTransactionRequestDto } from './dto/request/sign-tron-transaction.request.dto';
 import { BuildTronTransactionResponseDto } from './dto/response/build-tron-transaction.response.dto';
 import { SignTronTransactionResponseDto } from './dto/response/sign-tron-transaction.response.dto';
 import { TronTransactionService } from './service/tron-transaction.service';
@@ -58,11 +58,11 @@ export class TronTransactionController {
    */
   @Post('sign')
   @ApiOperation({ summary: 'Sign TRON transaction or transfer from payload' })
-  @ApiBody({ type: SignTronRawTransactionRequestDto })
+  @ApiBody({ type: SignTronTransactionRequestDto })
   @ApiResponse({ status: 201, type: SignTronTransactionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   sign(
-    @Body() body: SignTronRawTransactionRequestDto,
+    @Body() body: SignTronTransactionRequestDto,
   ): SignTronTransactionResponseDto {
     return this.tronTransactionService.sign(body);
   }

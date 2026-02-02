@@ -7,11 +7,11 @@ import {
   Matches,
 } from 'class-validator';
 
-export class SignTronRawTransactionRequestDto {
+export class SignTronTransactionRequestDto {
   @ApiProperty({
-    example:
-      '0x7b227472616e73666572223a7b226f776e657241646472657373223a222e2e2e227d7d',
-    description: 'Signing payload from build step (hex-encoded UTF-8 raw JSON)',
+    example: '0x0a0200002208...',
+    description:
+      'Signing payload from build step (hex-encoded Wallet-Core SigningInput)',
   })
   @Matches(/^(0x)?([0-9a-fA-F]{2})+$/)
   @IsString()

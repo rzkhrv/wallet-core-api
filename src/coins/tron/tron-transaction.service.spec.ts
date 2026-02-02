@@ -1,34 +1,19 @@
 import { TronTransactionService } from './service/tron-transaction.service';
 import { TronTransactionAdapter } from './adapter/tron-transaction.adapter';
-import { WalletCoreAdapter } from '../../common/wallet-core/wallet-core.adapter';
 
 describe('TRON transaction service', () => {
-  const normalizeHex = (value: string): string =>
-    value.startsWith('0x') || value.startsWith('0X') ? value.slice(2) : value;
-  const encodePayload = (rawJson: string): string =>
-    `0x${Buffer.from(rawJson, 'utf8').toString('hex')}`;
-  const makeTrc20Data = (addressHex: string, amountHex: string): string => {
-    const selector = Buffer.from('a9059cbb', 'hex');
-    const addressBytes = Buffer.from(addressHex, 'hex');
-    const addressWord = Buffer.concat([Buffer.alloc(12), addressBytes]);
-    const amountWord = Buffer.from(amountHex.padStart(64, '0'), 'hex');
-    return Buffer.concat([selector, addressWord, amountWord]).toString(
-      'base64',
-    );
-  };
-  const trc20AddressHex = '11'.repeat(20);
-  const trc20AmountHex = '64';
-  const trc20Data = makeTrc20Data(trc20AddressHex, trc20AmountHex);
   const adapterBuildResponse = {
-    rawJson: JSON.stringify({
-      transfer: {
-        ownerAddress: 'TJSON',
-        toAddress: 'TDEST',
-        amount: '2',
-      },
+    payload: '0xdeadbeef',
+    transaction: {
+      type: 'trx',
+      ownerAddress: 'TJSON',
+      toAddress: 'TDEST',
+      amount: '2',
       timestamp: '1000',
       expiration: '2000',
-    }),
+      feeLimit: null,
+      memo: null,
+    },
   };
   const signResponse = {
     txId: 'aa',
@@ -50,25 +35,10 @@ describe('TRON transaction service', () => {
       buildTransfer: jest.fn().mockReturnValue(adapterBuildResponse),
       signTransaction: jest.fn().mockReturnValue(signResponse),
     };
-    const walletCore: WalletCoreAdapter = {
-      getCore: () => ({
-        Base58: {
-          encode: (data: Uint8Array | Buffer) =>
-            `T${Buffer.from(data).toString('hex')}`,
-        },
-        HexCoding: {
-          encode: (data: Uint8Array | Buffer) =>
-            `0x${Buffer.from(data).toString('hex')}`,
-          decode: (value: string) =>
-            Uint8Array.from(Buffer.from(normalizeHex(value), 'hex')),
-        },
-      }),
-    } as WalletCoreAdapter;
     return {
       adapter,
       service: new TronTransactionService(
         adapter as unknown as TronTransactionAdapter,
-        walletCore,
       ),
     };
   };
@@ -82,19 +52,7 @@ describe('TRON transaction service', () => {
       blockId: '11'.repeat(32),
       blockNumber: '1',
     });
-    expect(result).toEqual({
-      payload: encodePayload(adapterBuildResponse.rawJson),
-      transaction: {
-        type: 'trx',
-        ownerAddress: 'TJSON',
-        toAddress: 'TDEST',
-        amount: '2',
-        timestamp: '1000',
-        expiration: '2000',
-        feeLimit: null,
-        memo: null,
-      },
-    });
+    expect(result).toEqual(adapterBuildResponse);
     expect(adapter.buildTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         ownerAddress: 'TXYZ',
@@ -104,76 +62,17 @@ describe('TRON transaction service', () => {
         blockNumber: '1',
       }),
     );
-  });
-
-  it('builds TRC10 transfer from params', () => {
-    const { adapter, service } = makeService();
-    const trc10Response = {
-      rawJson: JSON.stringify({
-        transferAsset: {
-          ownerAddress: 'TOWNER',
-          toAddress: 'TRECEIVER',
-          amount: '100',
-          assetName: 'ASSET',
-        },
-        timestamp: '1000',
-        expiration: '2000',
-      }),
-    };
-    adapter.buildTransfer.mockReturnValue(trc10Response);
-    const result = service.buildTransfer({
-      transferType: 'trc10',
-      ownerAddress: 'TXYZ',
-      toAddress: 'TABC',
-      amount: '100',
-      blockId: '11'.repeat(32),
-      blockNumber: '1',
-      assetName: 'TOKEN',
-    });
-    expect(result).toEqual({
-      payload: encodePayload(trc10Response.rawJson),
-      transaction: {
-        type: 'trc10',
-        ownerAddress: 'TOWNER',
-        toAddress: 'TRECEIVER',
-        amount: '100',
-        assetName: 'ASSET',
-        contractAddress: undefined,
-        callValue: undefined,
-        timestamp: '1000',
-        expiration: '2000',
-        feeLimit: null,
-        memo: null,
-      },
-    });
-    expect(adapter.buildTransfer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        transferType: 'trc10',
-        assetName: 'TOKEN',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
-      }),
-    );
+    const buildCalls = adapter.buildTransaction.mock.calls as Array<
+      [{ timestamp?: string; expiration?: string }]
+    >;
+    const buildArgs = buildCalls[0]?.[0];
+    expect(buildArgs.timestamp).toEqual(expect.any(String));
+    expect(buildArgs.expiration).toEqual(expect.any(String));
   });
 
   it('builds TRC20 transfer from params', () => {
     const { adapter, service } = makeService();
-    const trc20Response = {
-      rawJson: JSON.stringify({
-        triggerSmartContract: {
-          ownerAddress: 'TOWNER',
-          contractAddress: 'TCONTRACT',
-          data: trc20Data,
-          callValue: '0',
-        },
-        timestamp: '1000',
-        expiration: '2000',
-        feeLimit: '10000000',
-      }),
-    };
-    adapter.buildTransfer.mockReturnValue(trc20Response);
     const result = service.buildTransfer({
-      transferType: 'trc20',
       ownerAddress: 'TXYZ',
       toAddress: 'TABC',
       contractAddress: 'TCONTRACT',
@@ -183,25 +82,9 @@ describe('TRON transaction service', () => {
       callValue: '0',
       feeLimit: '10000000',
     });
-    expect(result).toEqual({
-      payload: encodePayload(trc20Response.rawJson),
-      transaction: {
-        type: 'trc20',
-        ownerAddress: 'TOWNER',
-        toAddress: `T41${trc20AddressHex}`,
-        amount: '100',
-        assetName: undefined,
-        contractAddress: 'TCONTRACT',
-        callValue: '0',
-        timestamp: '1000',
-        expiration: '2000',
-        feeLimit: '10000000',
-        memo: null,
-      },
-    });
+    expect(result).toEqual(adapterBuildResponse);
     expect(adapter.buildTransfer).toHaveBeenCalledWith(
       expect.objectContaining({
-        transferType: 'trc20',
         contractAddress: 'TCONTRACT',
         callValue: '0',
         feeLimit: '10000000',
@@ -209,11 +92,36 @@ describe('TRON transaction service', () => {
         blockNumber: '1',
       }),
     );
+    const transferCalls = adapter.buildTransfer.mock.calls as Array<
+      [{ timestamp?: string; expiration?: string }]
+    >;
+    const transferArgs = transferCalls[0]?.[0];
+    expect(transferArgs.timestamp).toEqual(expect.any(String));
+    expect(transferArgs.expiration).toEqual(expect.any(String));
   });
 
-  it('signs raw transaction when payload is provided', () => {
+  it('defaults timestamp and expiration when missing', () => {
     const { adapter, service } = makeService();
-    const payload = encodePayload('{"raw_data":{}}');
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    service.buildTransaction({
+      ownerAddress: 'TXYZ',
+      toAddress: 'TABC',
+      amount: '1',
+      blockId: '11'.repeat(32),
+      blockNumber: '1',
+    });
+    expect(adapter.buildTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timestamp: '1000000',
+        expiration: '1060000',
+      }),
+    );
+    nowSpy.mockRestore();
+  });
+
+  it('signs transaction when payload is provided', () => {
+    const { adapter, service } = makeService();
+    const payload = '0x0a0200002208';
     const result = service.sign({
       payload,
       privateKey: '00'.repeat(32),
@@ -222,7 +130,7 @@ describe('TRON transaction service', () => {
     expect(result).toBe(signResponse);
     expect(adapter.signTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
-        rawJson: '{"raw_data":{}}',
+        payload,
         privateKey: '00'.repeat(32),
         txId: 'txid',
       }),

@@ -23,7 +23,7 @@ Common issues and where to find the fix steps.
 5. For TRC20 build failures, handle `AnyAddress.data()` length 0 by decoding base58 and accept 20/21 bytes.
 6. For mnemonic-related 500s, validate mnemonics before wallet creation and wrap wallet creation in adapter try/catch.
 7. For BTC build/sign mismatches, check `TransactionPlan.error` from `AnySigner.plan` and fail fast when non-OK.
-8. For TRON `TAPOS_ERROR`, require `blockId` (32-byte hex) and `blockNumber` (decimal/hex), then derive `ref_block_bytes`/`ref_block_hash` into the payload.
+8. For TRON `TAPOS_ERROR`, require `blockId` (32-byte hex) and `blockNumber` (decimal), then derive `ref_block_bytes`/`ref_block_hash` into the payload.
 9. For TRON `SIGERROR`, ensure the signed response includes `raw_data_hex` and broadcast with `visible: false` (hex addresses). Compute `txID` from `raw_data_hex` (SHA-256) before signing; wallet-core uses provided `txID` as-is.
 
 ## Verification

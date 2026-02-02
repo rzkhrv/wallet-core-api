@@ -33,9 +33,8 @@ type TronBuildResponse = {
     ownerAddress?: string;
     toAddress?: string;
     amount?: string;
-    assetName?: string;
     contractAddress?: string;
-    callValue?: string;
+    callValue?: string | null;
     timestamp: string;
     expiration: string;
     feeLimit?: string | null;
@@ -271,6 +270,8 @@ describe('Wallet Core API (e2e)', () => {
         amount: '1',
         blockId: '11'.repeat(32),
         blockNumber: '1',
+        timestamp: '1000',
+        expiration: '2000',
       })
       .expect(201);
 
@@ -292,6 +293,8 @@ describe('Wallet Core API (e2e)', () => {
         amount: '1',
         blockId: '11'.repeat(32),
         blockNumber: '1',
+        timestamp: '1000',
+        expiration: '2000',
       })
       .expect(400);
   });
@@ -300,13 +303,14 @@ describe('Wallet Core API (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/build-transfer')
       .send({
-        transferType: 'trc20',
         ownerAddress: tronAddress,
         toAddress: tronAddress,
         contractAddress: tronAddress,
         amount: '1',
         blockId: '11'.repeat(32),
         blockNumber: '1',
+        timestamp: '1000',
+        expiration: '2000',
         feeLimit: '10000000',
         callValue: '0',
       })
@@ -319,7 +323,7 @@ describe('Wallet Core API (e2e)', () => {
     expect(body.transaction.toAddress).toBe(tronAddress);
     expect(body.transaction.amount).toBe('1');
     expect(body.transaction.contractAddress).toBe(tronAddress);
-    expect(body.transaction.callValue).toBe('0');
+    expect(body.transaction.callValue).toBeNull();
     tronTrc20Payload = body.payload;
   });
 
@@ -327,13 +331,14 @@ describe('Wallet Core API (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/build-transfer')
       .send({
-        transferType: 'trc20',
         ownerAddress: tronAddress,
         toAddress: tronAddress,
         contractAddress: 'invalid',
         amount: '1',
         blockId: '11'.repeat(32),
         blockNumber: '1',
+        timestamp: '1000',
+        expiration: '2000',
         feeLimit: '10000000',
         callValue: '0',
       })
@@ -376,7 +381,7 @@ describe('Wallet Core API (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/transaction/tron/sign')
       .send({
-        payload: '0x7b696e76616c6964',
+        payload: '0xzz',
         privateKey: '00'.repeat(32),
       })
       .expect(400);

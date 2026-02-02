@@ -13,6 +13,8 @@ describe('BuildTronTransactionRequestDto', () => {
     dto.amount = '1';
     dto.blockId = validBlockId;
     dto.blockNumber = validBlockNumber;
+    dto.timestamp = '1';
+    dto.expiration = '2';
     const errors: ValidationError[] = validateSync(dto);
     const hasOwnerError: boolean = errors.some(
       (error: ValidationError) => error.property === 'ownerAddress',
@@ -28,6 +30,8 @@ describe('BuildTronTransactionRequestDto', () => {
     dto.amount = '1';
     dto.blockId = '';
     dto.blockNumber = '';
+    dto.timestamp = '1';
+    dto.expiration = '2';
     const errors: ValidationError[] = validateSync(dto);
     const hasBlockIdError: boolean = errors.some(
       (error: ValidationError) => error.property === 'blockId',
