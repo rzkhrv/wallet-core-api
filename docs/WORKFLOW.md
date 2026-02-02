@@ -10,6 +10,7 @@ This document is the mandatory workflow for any agent working in this repo. It c
 - Before starting work, re-open the task file and re-read it to confirm `[accepted]` and any edits made after your last read.
 - Before execution, explicitly restate the task constraints/scope and do not change files outside the plan.
 - Changing or touching files not mentioned in the plan is forbidden unless the task file is updated and re-accepted.
+- Before any change, emit a Task Snapshot: task file path, confirmation of `[accepted]`, and an explicit allowlist of files/actions. Without Task Snapshot, any changes are forbidden.
 - If there are multiple tasks, create one file per task and keep them as a permanent history of the proposed approach and agreed changes.
 - Always start with planning and a task list.
 - Every task and subtask must be recorded in BD (beads) and described.

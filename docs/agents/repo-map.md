@@ -24,7 +24,7 @@ Let an agent find the right place to make changes without guessing.
 - Docs: `docs/PROJECT.md`, `docs/COINS.md`, `docs/WORKFLOW.md`
 - Generated: `dist/` (do not edit), `node_modules/` (do not edit)
 - Task tracking: `.beads/`
-- Task plans: `tasks/` (mandatory before implementation; `{index}-task.md` in Russian; must start with `[accepted]` to allow execution; re-read and respect scope before work)
+- Task plans: `tasks/` (mandatory before implementation; `{index}-task.md` in Russian; must start with `[accepted]` to allow execution; re-read and respect scope before work; Task Snapshot required)
 
 ## Verification
 - You can locate the controller/service/adapter for an existing coin (e.g., BTC).
