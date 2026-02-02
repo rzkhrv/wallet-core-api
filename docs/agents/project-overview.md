@@ -6,6 +6,7 @@ Agent-facing delta for the Wallet Core API. This file intentionally stays short 
 ## Canonical references (source of truth)
 - Architecture/runtime: `docs/PROJECT.md`
 - Workflow/DoD: `docs/WORKFLOW.md`
+- Task acceptance protocol: `docs/agents/workflows/01-general-protocol.md`
 - Coin onboarding: `docs/COINS.md`
 - Coding conventions: `docs/coding-rules.md`
 - Transaction rules: `docs/agents/patterns/proto-first-transactions.md`

@@ -27,11 +27,12 @@ Provide concrete bd commands; if this file conflicts with `docs/WORKFLOW.md`, fo
    ```bash
    bd create "New task title" --description "Context: ... Acceptance: ... Plan: ... Dependencies: discovered-from:<parent-id>" --type task --priority 2 --deps discovered-from:<parent-id> --json
    ```
-6. Close when acceptance criteria is met:
+6. Note: BD does not accept issue type `docs`. Use `task` (or another valid type) for documentation work.
+7. Close when acceptance criteria is met:
    ```bash
    bd close <id> --reason "Completed" --json
    ```
-7. Sync Beads changes as part of the session closeout:
+8. Sync Beads changes as part of the session closeout:
    ```bash
    bd sync
    ```
