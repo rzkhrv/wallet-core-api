@@ -4,7 +4,7 @@ These rules align with the current wallet-core-api codebase. If a rule conflicts
 
 ## General TypeScript
 
-- Use English for all code and documentation.
+- Use English for all code and documentation. Exception: `tasks/*.md` must be in Russian and use the `[accepted]` gate rule; always re-read tasks and honor scope before changes.
 - Prefer explicit types for public APIs (controller/service/adapter methods and DTOs).
 - Avoid `any`; use `unknown` or concrete types.
 - Use kebab-case for file and directory names.

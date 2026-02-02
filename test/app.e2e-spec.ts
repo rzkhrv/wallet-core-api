@@ -79,6 +79,14 @@ describe('Wallet Core API (e2e)', () => {
   let tronPrivateKey: string;
   let tronPayload: string;
   let tronTrc20Payload: string;
+  const tronBlockHeader = {
+    number: '1',
+    parentHash: '11'.repeat(32),
+    txTrieRoot: '22'.repeat(32),
+    witnessAddress: `41${'aa'.repeat(20)}`,
+    version: '2',
+    timestamp: '1738253400000',
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -268,8 +276,7 @@ describe('Wallet Core API (e2e)', () => {
         ownerAddress: tronAddress,
         toAddress: tronAddress,
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader: tronBlockHeader,
         timestamp: '1000',
         expiration: '2000',
       })
@@ -291,8 +298,7 @@ describe('Wallet Core API (e2e)', () => {
         ownerAddress: 'invalid',
         toAddress: tronAddress,
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader: tronBlockHeader,
         timestamp: '1000',
         expiration: '2000',
       })
@@ -307,8 +313,7 @@ describe('Wallet Core API (e2e)', () => {
         toAddress: tronAddress,
         contractAddress: tronAddress,
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader: tronBlockHeader,
         timestamp: '1000',
         expiration: '2000',
         feeLimit: '10000000',
@@ -335,8 +340,7 @@ describe('Wallet Core API (e2e)', () => {
         toAddress: tronAddress,
         contractAddress: 'invalid',
         amount: '1',
-        blockId: '11'.repeat(32),
-        blockNumber: '1',
+        blockHeader: tronBlockHeader,
         timestamp: '1000',
         expiration: '2000',
         feeLimit: '10000000',

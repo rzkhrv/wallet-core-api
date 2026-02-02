@@ -3,6 +3,14 @@
 This document is the mandatory workflow for any agent working in this repo. It complements `AGENTS.md` and does not replace it.
 
 ## Mandatory process rules
+- Before any implementation or code changes, create a task plan file in `tasks/` using the naming format `{index}-task.md` (e.g., `00001-task.md`).
+- Task plan files must be written in Russian.
+- A task plan is executable only if the first line of the file is exactly `[accepted]`.
+- If `[accepted]` is missing, implementing the plan is strictly запрещено.
+- Before starting work, re-open the task file and re-read it to confirm `[accepted]` and any edits made after your last read.
+- Before execution, explicitly restate the task constraints/scope and do not change files outside the plan.
+- Changing or touching files not mentioned in the plan is forbidden unless the task file is updated and re-accepted.
+- If there are multiple tasks, create one file per task and keep them as a permanent history of the proposed approach and agreed changes.
 - Always start with planning and a task list.
 - Every task and subtask must be recorded in BD (beads) and described.
 - If new work is discovered mid-task, create a new BD task and link it (`discovered-from:<parent-id>`). Do not silently expand scope.
