@@ -3,6 +3,11 @@
 ## Context
 `@trustwallet/wallet-core` WASM fails to initialize or the adapter reports uninitialized core.
 
+## Note for agents
+Follow `AGENTS.md` and `docs/WORKFLOW.md`:
+- run commands only after the task plan is accepted (`[accepted]` gate)
+- run commands only if they are included in the task’s command allowlist
+
 ## Symptoms
 - Error: "WalletCore is not initialized".
 - Exceptions during `initWasm()`.
@@ -29,4 +34,4 @@
 - `src/common/wallet-core/wallet-core.adapter.ts`
 - `package.json`
 
-Last updated: 2026-02-01
+Last updated: 2026-02-03

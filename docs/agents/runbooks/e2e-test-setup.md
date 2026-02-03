@@ -3,6 +3,11 @@
 ## Context
 End-to-end tests fail to start or fail unexpectedly.
 
+## Note for agents
+Follow `AGENTS.md` and `docs/WORKFLOW.md`:
+- run commands only after the task plan is accepted (`[accepted]` gate)
+- run commands only if they are included in the task’s command allowlist
+
 ## Symptoms
 - `npm run test:e2e` exits with setup errors.
 - Tests hang or crash during wallet-core calls.
@@ -30,4 +35,4 @@ End-to-end tests fail to start or fail unexpectedly.
 - `test/app.e2e-spec.ts`
 - `docs/agents/runbooks/wallet-core-init.md`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-03

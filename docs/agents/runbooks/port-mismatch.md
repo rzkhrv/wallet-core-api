@@ -3,6 +3,11 @@
 ## Context
 README mentions port 3000 but the app listens on a different default.
 
+## Note for agents
+Follow `AGENTS.md` and `docs/WORKFLOW.md`:
+- run commands only after the task plan is accepted (`[accepted]` gate)
+- run commands only if they are included in the task’s command allowlist
+
 ## Symptoms
 - Server starts on `http://localhost:3001` while expecting `3000`.
 
@@ -23,4 +28,4 @@ README mentions port 3000 but the app listens on a different default.
 - `src/main.ts`
 - `README.md`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-03

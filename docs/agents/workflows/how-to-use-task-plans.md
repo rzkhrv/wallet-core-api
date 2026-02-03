@@ -1,25 +1,27 @@
 # Workflow: how to use task plans
 
 ## Context
-Step-by-step task plan usage. The canonical rules live in `docs/WORKFLOW.md`.
+Step-by-step task plan usage.
 
-## Goal
-Provide concrete steps for task plan files; if this file conflicts with `docs/WORKFLOW.md`, follow `docs/WORKFLOW.md`.
+Canonical rules:
+- `AGENTS.md` (hard rules)
+- `docs/WORKFLOW.md` (full protocol + DoD + template)
 
 ## Steps
-1. Create a new task plan file in `tasks/` using `{index}-task.md`.
-2. Write the plan in Russian and ensure the first line is exactly `[accepted]` before execution.
-3. Fill in Title, Priority, Status, Description (Context/Acceptance), Plan, Dependencies.
-4. Before making changes, re-open the file, confirm `[accepted]`, and emit the Task Snapshot.
-5. If scope changes, update the plan; if new work is discovered, create a new task plan file and link it in Dependencies.
-6. When done, set Status to done and record any skipped checks with reasons.
+1. Create a new task plan file in `tasks/` by copying `tasks/_template-task.md` to `tasks/NNNNN-task.md` (example: `tasks/00001-task.md`).
+2. Write the plan in **Russian**. Keep the first line as a draft marker (do **not** add `[accepted]` yourself).
+3. Include acceptance criteria, non-goals, risks, rollback, and explicit **allowlists** (files/dirs + commands).
+4. Ask the owner to review. Execution is allowed only after the owner sets `[accepted]` as the first non-empty line.
+5. Before any changes, re-open and re-read the task file, then emit a **Task Snapshot** (allowlists).
+6. If scope changes, stop, update the plan, and wait for re-acceptance.
 
 ## Verification
-- A task plan file exists in `tasks/` with `[accepted]` and current scope.
-- Dependencies are explicit and up to date.
+- A task plan file exists in `tasks/` and matches the current scope.
+- If implementing: the first non-empty line is `[accepted]` and a Task Snapshot allowlist exists.
 
 ## References
 - `docs/WORKFLOW.md`
+- `tasks/_template-task.md`
 - `tasks/`
 
-Last updated: 2026-02-02
+Last updated: 2026-02-03

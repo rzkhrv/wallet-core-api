@@ -1,10 +1,16 @@
 # Coding rules (repo-aligned)
 
-These rules align with the current wallet-core-api codebase. If a rule conflicts with existing code or docs, prefer the repo patterns.
+These rules align with the current wallet-core-api codebase.
+
+**Priority note:** Agent workflow hard rules live in `AGENTS.md` and `docs/WORKFLOW.md`. Nothing in this file overrides those workflow/safety rules.
 
 ## General TypeScript
 
-- Use English for all code and documentation. Exception: `tasks/*.md` must be in Russian and use the `[accepted]` gate rule; always re-read tasks, emit Task Snapshot, and honor scope before changes.
+- Language:
+  - Use **English** for code, identifiers, and code comments.
+  - Keep documentation under `docs/` in **English**.
+  - Exception: `tasks/*.md` must be written in **Russian** and must follow the `[accepted]` gate + Task Snapshot allowlist rules (see `AGENTS.md` and `docs/WORKFLOW.md`).
+  - It is OK for docs to embed **Russian snippets** that are intended to be copied into task files.
 - Prefer explicit types for public APIs (controller/service/adapter methods and DTOs).
 - Avoid `any`; use `unknown` or concrete types.
 - Use kebab-case for file and directory names.
@@ -31,4 +37,5 @@ These rules align with the current wallet-core-api codebase. If a rule conflicts
 - Use Jest.
 - Add/update `src/**/*.spec.ts` for controller/service coverage.
 - Add/update `test/*.e2e-spec.ts` for endpoint coverage.
- 
+
+Last updated: 2026-02-03

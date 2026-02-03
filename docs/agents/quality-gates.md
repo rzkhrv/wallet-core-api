@@ -6,6 +6,11 @@ Convenience checklist for running the repo checks. The canonical DoD lives in `d
 ## Goal
 Provide a quick command list; if this file conflicts with `docs/WORKFLOW.md`, follow `docs/WORKFLOW.md`.
 
+## Note for agents
+If you are acting as an agent, run commands only when:
+- the task plan is accepted (`[accepted]` gate), and
+- the command is included in the task’s command allowlist (Task Snapshot)
+
 ## Steps
 1. Format:
    ```bash
@@ -37,4 +42,4 @@ Provide a quick command list; if this file conflicts with `docs/WORKFLOW.md`, fo
 - `package.json`
 - `test/jest-e2e.json`
 
-Last updated: 2026-01-31
+Last updated: 2026-02-03

@@ -1,17 +1,20 @@
 # Docs index (start here)
 
-## Source of truth
-- Architecture/runtime overview: `docs/PROJECT.md`.
-- Workflow + DoD + task plan rules: `docs/WORKFLOW.md` (secondary docs should point here).
-- Coin support and onboarding: `docs/COINS.md`.
-- Coding conventions: `docs/coding-rules.md`.
-- Troubleshooting steps: runbooks under `docs/agents/runbooks/` (use `docs/agents/troubleshooting.md` as an index only).
+## Priority (source of truth order)
+1) `AGENTS.md` — hard rules for agents (must follow).
+2) `docs/WORKFLOW.md` — task-plan protocol + DoD + templates (mandatory).
+3) `docs/PROJECT.md` — architecture/runtime overview.
+4) `docs/COINS.md` — coin support/onboarding.
+5) `docs/coding-rules.md` — coding conventions.
+6) Runbooks/patterns/decisions under `docs/agents/`.
+
+If instructions conflict, follow the higher-priority document.
 
 ## Core docs
-- `docs/PROJECT.md` - architecture and runtime overview.
-- `docs/WORKFLOW.md` - mandatory agent workflow and DoD.
-- `docs/COINS.md` - add/maintain coin support.
-- `docs/coding-rules.md` - repo-aligned coding rules.
+- `docs/PROJECT.md` — architecture and runtime overview.
+- `docs/WORKFLOW.md` — mandatory agent workflow and DoD.
+- `docs/COINS.md` — add/maintain coin support.
+- `docs/coding-rules.md` — repo-aligned coding rules.
 
 ## Agent guides
 - `docs/agents/project-overview.md`
@@ -41,3 +44,5 @@
 ## Decisions
 - `docs/agents/decisions/0001-adapter-isolation.md`
 - `docs/agents/decisions/0002-tron-proto-first-signing.md`
+
+Last updated: 2026-02-03
