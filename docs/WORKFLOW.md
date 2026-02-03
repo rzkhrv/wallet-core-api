@@ -13,14 +13,14 @@ This document is the mandatory workflow for any agent working in this repo. It c
 - Before any change, emit a Task Snapshot: task file path, confirmation of `[accepted]`, and an explicit allowlist of files/actions. Without Task Snapshot, any changes are forbidden.
 - If there are multiple tasks, create one file per task and keep them as a permanent history of the proposed approach and agreed changes.
 - Always start with planning and a task list.
-- Every task and subtask must be recorded in BD (beads) and described.
-- If new work is discovered mid-task, create a new BD task and link it (`discovered-from:<parent-id>`). Do not silently expand scope.
+- Every task and subtask must be recorded in task plan files and described.
+- If new work is discovered mid-task, create a new task plan file and link it from the parent in Dependencies (e.g., `discovered-from:<parent-task>`). Do not silently expand scope.
 - Large tasks must be split into micro-tasks and prioritized.
-- Each BD task must include:
+- Each task plan file must include:
   - Description (context + acceptance criteria).
   - Implementation plan (step-by-step).
-  - Dependencies (explicit BD task IDs).
-- Update BD tasks when progress changes (status updates, description changes, or comments).
+  - Dependencies (explicit task file IDs).
+- Update task plan files when progress changes (status updates, description changes, or comments).
 
 ## Definition of Done (DoD) per task
 - Run format: `npm run format`.
@@ -31,7 +31,7 @@ This document is the mandatory workflow for any agent working in this repo. It c
 - Run build/typecheck: `npm run build`.
 - All new/changed endpoints must have automated tests (see below).
 
-If a test cannot run due to missing environment or data, log that in the BD task description and create a follow-up task with the blocker.
+If a test cannot run due to missing environment or data, log that in the task plan file and create a follow-up task plan file with the blocker.
 
 ## Endpoint test requirement (what it means here)
 For this repo, an "endpoint test" means:
@@ -42,13 +42,13 @@ When you add a new endpoint, you must:
 - Add or extend the relevant `src/**/*.spec.ts` tests.
 - Add or extend an e2e spec in `test/*.e2e-spec.ts` that calls the new route and asserts response shape and status.
 
-## Suggested BD task template
-Use this structure for every BD task (description field):
+## Suggested task plan template
+Use this structure for every task plan file:
 
 ```
 Title: <short, actionable>
-Type: task|feature|bug|docs
 Priority: 0-4
+Status: planned|in_progress|blocked|done
 Description:
   Context: <why this task exists>
   Acceptance:
@@ -57,32 +57,34 @@ Description:
   Plan:
     1) <step 1>
     2) <step 2>
-Dependencies: <bd-ids or 'none'>
+Dependencies: <task file ids or 'none'>
 ```
 
-## Example: BD task breakdown for a feature (with deps)
+## Example: task breakdown for a feature (with deps)
 Feature: "Add LTC support" (example only).
 
-Commands (all should include `--json`):
-
 ```
-bd create "Add LTC support" --description="Context: add LTC endpoints and adapters. Acceptance: endpoints + tests + docs. Plan: split into subtasks. Dependencies: none" -t epic -p 1 --json
-
-bd create "Add LTC wallet-core config" --description="Context: add per-coin wallet-core config. Acceptance: ltc-wallet-core.config.ts with wallet-core keys. Plan: add config + resolver. Dependencies: none" -t task -p 1 --json
-
-bd create "Implement LTC adapters" --description="Context: wallet-core adapter layer. Acceptance: address + transaction adapters with Input/Output DTOs under src/coins/ltc/adapter. Plan: create adapter files + DTOs + coin module providers. Dependencies: bd-<config-id>" -t task -p 1 --json
-
-bd create "Implement LTC module/controllers/services" --description="Context: API layer. Acceptance: controllers/services + DTOs + CoinsModule registration. Plan: create module/controllers/services + DTOs and add to coins.module.ts. Dependencies: bd-<config-id>, bd-<adapter-id>" -t task -p 1 --json
-
-bd create "Add LTC tests" --description="Context: endpoint coverage. Acceptance: unit/integration + e2e tests. Plan: add specs in src + test/*.e2e-spec.ts. Dependencies: bd-<api-id>" -t task -p 1 --json
+tasks/00010-task.md
+tasks/00011-task.md
+tasks/00012-task.md
+tasks/00013-task.md
+tasks/00014-task.md
 ```
 
-When progress changes, update tasks (status, description, or comments):
+Example content for `tasks/00011-task.md`:
 
 ```
-bd update bd-123 --status in_progress --json
-bd update bd-123 --description="Context: ... Plan updated to include ..." --json
-bd close bd-123 --reason "Completed" --json
+[accepted]
+Title: Add LTC wallet-core config
+Priority: 1
+Status: planned
+Description:
+  Context: add per-coin wallet-core config.
+  Acceptance:
+    - ltc-wallet-core.config.ts with wallet-core keys
+  Plan:
+    1) Add config file and register it in coin config resolver.
+Dependencies: none
 ```
 
 See `docs/COINS.md` for coin-specific steps and `docs/PROJECT.md` for repo layout.

@@ -78,7 +78,7 @@ src/
 - BTC build uses a fixed SIGHASH type (`1`, SIGHASH_ALL); it is surfaced in the build `transaction` for inspection but not accepted in requests.
 
 ## Step-by-step: add a new coin
-1. Create BD tasks (see `docs/WORKFLOW.md`). Do not expand scope without new tasks.
+1. Create task plan files (see `docs/WORKFLOW.md`). Do not expand scope without new tasks.
 2. Add wallet-core configuration:
    - Create `src/coins/<coin>/*-wallet-core.config.ts` with the correct `coinTypeKey`, `purposeKey`, and `derivationKey`.
 3. Add adapters:

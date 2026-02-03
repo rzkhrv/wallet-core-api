@@ -39,11 +39,11 @@ npm run build
 - `docs/` - project docs (`PROJECT.md`, `COINS.md`, `WORKFLOW.md`).
 - `dist/` - build output (generated, do not edit).
 - `node_modules/` - dependencies (generated, do not edit).
-- `.beads/` - issue tracking data (tracked in git).
+- `tasks/` - task plan files (mandatory before implementation).
 
 ## Workflows
 
-- How to use bd (required): `docs/agents/workflows/how-to-use-bd.md`.
+- How to use task plans (required): `docs/agents/workflows/how-to-use-task-plans.md`.
 - How to extend the project (new coins/features): `docs/agents/workflows/how-to-extend-the-project.md`.
 - Add a new coin: `docs/COINS.md` (also linked from workflows).
 - Add a new endpoint: see `docs/agents/patterns/` for controller/service/adapter examples.
@@ -54,16 +54,14 @@ Any new non-obvious repo knowledge, failure mode, or workflow discovered during 
 
 ## Task management rule (mandatory)
 
-- All work must be tracked in Beads.
-- Start with `bd ready --json`, then `bd show <id>`.
-- Mark in progress via `bd update <id> --status in_progress --json`.
-- Create new beads for newly discovered work (`--deps discovered-from:<id>`).
-- Every epic must include a “Docs/Knowledge capture” task.
+- All work must be tracked via task plan files in `tasks/` (see `docs/WORKFLOW.md`).
+- Before starting work, ensure the task plan file exists, starts with `[accepted]`, and is re-read after edits.
+- If new work is discovered, create a new task plan file and link it from the parent in a Dependencies section.
+- Every epic must include a “Docs/Knowledge capture” task plan.
 
 ## Boundaries
 
 ✅ Always do
-- Use bd for task tracking and keep .beads in sync.
 - Follow `docs/WORKFLOW.md` and `docs/coding-rules.md` for conventions.
 - Add tests for new endpoints (unit/integration + e2e).
 
@@ -75,11 +73,10 @@ Any new non-obvious repo knowledge, failure mode, or workflow discovered during 
 🚫 Never do
 - Log or persist secrets (mnemonics, private keys, raw signatures).
 - Edit generated files (`dist/`, `node_modules/`).
-- Bypass bd for task tracking or use markdown TODO lists.
+- Bypass the task plan workflow or use markdown TODO lists instead.
 
 ## Troubleshooting (top issues)
 
-- bd daemon slow start or auto-flush permission errors: see `docs/agents/runbooks/bd-daemon-issues.md`.
 - Port mismatch (README says 3000, app defaults to 3001): see `docs/agents/troubleshooting.md`.
 - wallet-core WASM init errors: see `docs/agents/runbooks/wallet-core-init.md`.
 - Failing e2e tests on first run: see `docs/agents/runbooks/e2e-test-setup.md`.
@@ -92,5 +89,5 @@ Any new non-obvious repo knowledge, failure mode, or workflow discovered during 
 - `docs/agents/quality-gates.md`
 - `docs/agents/security.md`
 - `docs/agents/troubleshooting.md`
-- `docs/agents/workflows/how-to-use-bd.md`
+- `docs/agents/workflows/how-to-use-task-plans.md`
 - `docs/agents/workflows/how-to-extend-the-project.md`

@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Architecture/runtime overview: `docs/PROJECT.md`.
-- Workflow + DoD + BD rules: `docs/WORKFLOW.md` (secondary docs should point here).
+- Workflow + DoD + task plan rules: `docs/WORKFLOW.md` (secondary docs should point here).
 - Coin support and onboarding: `docs/COINS.md`.
 - Coding conventions: `docs/coding-rules.md`.
 - Troubleshooting steps: runbooks under `docs/agents/runbooks/` (use `docs/agents/troubleshooting.md` as an index only).
@@ -28,11 +28,12 @@
 - `docs/agents/patterns/e2e-test-pattern.md`
 
 ## Workflows
-- `docs/agents/workflows/how-to-use-bd.md`
+- `docs/agents/workflows/01-general-protocol.md`
+- `docs/agents/workflows/how-to-use-task-plans.md`
 - `docs/agents/workflows/how-to-extend-the-project.md`
 
 ## Runbooks
-- `docs/agents/runbooks/bd-daemon-issues.md`
+- `docs/agents/runbooks/task-plan-issues.md`
 - `docs/agents/runbooks/port-mismatch.md`
 - `docs/agents/runbooks/wallet-core-init.md`
 - `docs/agents/runbooks/e2e-test-setup.md`

@@ -4,7 +4,7 @@
 Common issues and where to find the canonical fix steps.
 
 ## Symptom index (start here)
-- `bd` commands are slow or show auto-flush permission errors → `docs/agents/runbooks/bd-daemon-issues.md`.
+- Task plan file is missing/invalid or Task Snapshot is out of sync → `docs/agents/runbooks/task-plan-issues.md`.
 - Server starts on a different port than expected → `docs/agents/runbooks/port-mismatch.md`.
 - wallet-core WASM fails to initialize → `docs/agents/runbooks/wallet-core-init.md`.
 - E2E tests fail on first run → `docs/agents/runbooks/e2e-test-setup.md`.
@@ -18,7 +18,7 @@ Common issues and where to find the canonical fix steps.
 - You can find the runbook or source-of-truth link for the symptom.
 
 ## References
-- `docs/agents/runbooks/bd-daemon-issues.md`
+- `docs/agents/runbooks/task-plan-issues.md`
 - `docs/agents/runbooks/port-mismatch.md`
 - `docs/agents/runbooks/wallet-core-init.md`
 - `docs/agents/runbooks/e2e-test-setup.md`
